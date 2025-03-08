@@ -1,2 +1,0 @@
-# profitpulse
-earn
