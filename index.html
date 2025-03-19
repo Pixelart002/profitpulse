@@ -1,188 +1,289 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Floppy Bird</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        body {
-            margin: 0;
-            text-align: center;
-            font-family: 'Press Start 2P', cursive;
-            user-select: none;
-            background: #70c5ce;
-            overflow: hidden;
-        }
-        canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-        }
-        header {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.6);
-            padding: 5px 10px;
-            color: white;
-            border-radius: 5px;
-            font-size: 14px;
-            z-index: 10;
-        }
-        .score-container {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-        }
-        .modal, #homeScreen {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            z-index: 20;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Floppy Bird</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      margin: 0;
+      text-align: center;
+      font-family: 'Press Start 2P', cursive;
+      user-select: none;
+      background: #70c5ce;
+      overflow: hidden;
+    }
+    
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+    }
+    
+    header {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.6);
+      padding: 5px 10px;
+      color: white;
+      border-radius: 5px;
+      font-size: 14px;
+      z-index: 10;
+    }
+    
+    .score-container {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+    
+    .modal,
+    #homeScreen {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      z-index: 20;
+    }
+    
+    #leaderboardIcon {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 30;
+    }
+    
+    #leaderboardModal ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    
+    #leaderboardModal li {
+      margin: 5px 0;
+    }
+  </style>
 </head>
+
 <body>
-
-    <div id="homeScreen">
-        <h1>Floppy Bird</h1>
-        <button onclick="startGame()">Start Game</button>
+  
+  <div id="homeScreen">
+    <h1>Floppy Bird</h1>
+    <button onclick="startGame()">Start Game</button>
+  </div>
+  
+  <header>
+    <div class="score-container">
+      <div id="bestScore">Best: 0</div>
+      <div id="currentScore">Current: 0</div>
+      <div id="lives">Lives: 3</div>
     </div>
-
-    <header>
-        <div class="score-container">
-            <div id="bestScore">Best: 0</div>
-            <div id="currentScore">Current: 0</div>
-            <div id="lives">Lives: 3</div>
-        </div>
-    </header>
-
-    <canvas id="canvas"></canvas>
-
-    <div id="gameOverModal" class="modal">
-        <h2>Game Over</h2>
-        <p>Watch an ad to continue?</p>
-        <button onclick="watchAd()">Watch Ad</button>
-        <button onclick="exitGame()">Exit</button>
-    </div>
-
-    <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const img = new Image();
-        img.src = "https://i.ibb.co/Q9yv5Jk/flappy-bird-set.png";
-
-        let gamePlaying = false, lives = 3, bestScore = 0, currentScore = 0, flyHeight, flight, pipes = [];
-        const gravity = 0.5, speed = 6.2, size = [51, 36], jump = -11.5, pipeWidth = 78, pipeGap = 270;
-        const cTenth = (canvas.width / 10);
-        let user_id = null;
-
-        function getUserId() {
-            if (window.Telegram && Telegram.WebApp.initDataUnsafe.user) {
-                user_id = Telegram.WebApp.initDataUnsafe.user.id;
-            } else {
-                user_id = 'guest_' + Math.floor(Math.random() * 1000000);
-            }
-            console.log("User ID:", user_id);
+  </header>
+  
+  <canvas id="canvas"></canvas>
+  
+  <div id="gameOverModal" class="modal">
+    <h2>Game Over</h2>
+    <p>Watch an ad to continue?</p>
+    <button onclick="watchAd()">Watch Ad</button>
+    <button onclick="exitGame()">Exit</button>
+  </div>
+  
+  <div id="leaderboardIcon" class="icon" onclick="showLeaderboard()">🏆</div>
+  
+  <div id="leaderboardModal" class="modal">
+    <h2>Leaderboard</h2>
+    <ul id="leaderboardList"></ul>
+    <button onclick="closeLeaderboard()">Close</button>
+  </div>
+  
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.src = "https://i.ibb.co/Q9yv5Jk/flappy-bird-set.png";
+    
+    let gamePlaying = false,
+      lives = 3,
+      bestScore = localStorage.getItem("bestScore") ? parseInt(localStorage.getItem("bestScore")) : 0,
+      currentScore = 0,
+      flyHeight, flight, pipes = [];
+    
+    const gravity = 0.5,
+      speed = 6.2,
+      size = [51, 36],
+      jump = -11.5,
+      pipeWidth = 78,
+      pipeGap = 270;
+    
+    const cTenth = (canvas.width / 10);
+    let playerId = localStorage.getItem("playerId");
+    let sessionId = localStorage.getItem("sessionId");
+    
+    if (!playerId) {
+      playerId = 'player_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem("playerId", playerId);
+    }
+    
+    if (!sessionId) {
+      sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem("sessionId", sessionId);
+    }
+    
+    console.log("Player ID:", playerId);
+    console.log("Session ID:", sessionId);
+    
+    const leaderboardData = [
+      { playerId: 'player_1', score: 150 },
+      { playerId: 'player_2', score: 120 },
+      { playerId: 'player_3', score: 100 },
+    ];
+    
+    function getUserId() {
+      if (window.Telegram && Telegram.WebApp.initDataUnsafe.user) {
+        playerId = Telegram.WebApp.initDataUnsafe.user.id;
+      } else {
+        playerId = 'guest_' + Math.floor(Math.random() * 1000000);
+      }
+      console.log("User ID:", playerId);
+    }
+    
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    
+    function pipeLoc() {
+      return (Math.random() * ((canvas.height - (pipeGap + pipeWidth)) - pipeWidth)) + pipeWidth;
+    }
+    
+    function setup() {
+      currentScore = 0;
+      flight = jump;
+      flyHeight = (canvas.height / 2) - (size[1] / 2);
+      pipes = Array(3).fill().map((_, i) => [canvas.width + (i * (pipeGap + pipeWidth)), pipeLoc()]);
+    }
+    
+    function render() {
+      if (!gamePlaying) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+      
+      pipes.forEach(pipe => {
+        pipe[0] -= speed;
+        ctx.drawImage(img, 432, 588 - pipe[1], pipeWidth, pipe[1], pipe[0], 0, pipeWidth, pipe[1]);
+        ctx.drawImage(img, 432 + pipeWidth, 108, pipeWidth, canvas.height - pipe[1] + pipeGap, pipe[0], pipe[1] + pipeGap, pipeWidth, canvas.height - pipe[1] + pipeGap);
+        
+        if (pipe[0] <= -pipeWidth) {
+          currentScore++;
+          if (currentScore > bestScore) {
+            bestScore = currentScore;
+            localStorage.setItem("bestScore", bestScore);
+          }
+          pipes = [...pipes.slice(1), [pipes[pipes.length - 1][0] + pipeGap + pipeWidth, pipeLoc()]];
         }
-
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        function pipeLoc() {
-            return (Math.random() * ((canvas.height - (pipeGap + pipeWidth)) - pipeWidth)) + pipeWidth;
-        }
-
-        function setup() {
-            currentScore = 0; flight = jump;
-            flyHeight = (canvas.height / 2) - (size[1] / 2);
-            pipes = Array(3).fill().map((_, i) => [canvas.width + (i * (pipeGap + pipeWidth)), pipeLoc()]);
-        }
-
-        function render() {
-            if (!gamePlaying) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
-
-            pipes.forEach(pipe => {
-                pipe[0] -= speed;
-                ctx.drawImage(img, 432, 588 - pipe[1], pipeWidth, pipe[1], pipe[0], 0, pipeWidth, pipe[1]);
-                ctx.drawImage(img, 432 + pipeWidth, 108, pipeWidth, canvas.height - pipe[1] + pipeGap, pipe[0], pipe[1] + pipeGap, pipeWidth, canvas.height - pipe[1] + pipeGap);
-                if (pipe[0] <= -pipeWidth) {
-                    currentScore++;
-                    bestScore = Math.max(bestScore, currentScore);
-                    pipes = [...pipes.slice(1), [pipes[pipes.length-1][0] + pipeGap + pipeWidth, pipeLoc()]];
-                }
-                if ([pipe[0] <= cTenth + size[0], pipe[0] + pipeWidth >= cTenth, pipe[1] > flyHeight || pipe[1] + pipeGap < flyHeight + size[1]].every(e => e)) {
-                    lives--;
-                    if (lives > 0) {
-                        setup();
-                    } else {
-                        gamePlaying = false;
-                        document.getElementById('gameOverModal').style.display = 'block';
-                    }
-                }
-            });
-
-            if (gamePlaying) {
-                ctx.drawImage(img, 432, Math.floor((currentScore % 9) / 3) * size[1], ...size, cTenth, flyHeight, ...size);
-                flight += gravity;
-                flyHeight = Math.min(flyHeight + flight, canvas.height - size[1]);
-            } else {
-                ctx.drawImage(img, 432, 0, ...size, (canvas.width / 2) - size[0] / 2, flyHeight, ...size);
-            }
-
-            document.getElementById('bestScore').innerText = `Best: ${bestScore}`;
-            document.getElementById('currentScore').innerText = `Current: ${currentScore}`;
-            document.getElementById('lives').innerText = `Lives: ${lives}`;
-            requestAnimationFrame(render);
-        }
-
-        function startGame() {
-            document.getElementById('homeScreen').style.display = "none";
-            gamePlaying = true;
-            getUserId();
+        
+        if ([pipe[0] <= cTenth + size[0], pipe[0] + pipeWidth >= cTenth, pipe[1] > flyHeight || pipe[1] + pipeGap < flyHeight + size[1]].every(e => e)) {
+          lives--;
+          if (lives > 0) {
             setup();
-            render();
+          } else {
+            gamePlaying = false;
+            document.getElementById('gameOverModal').style.display = 'block';
+            submitScore();
+          }
         }
-
-        function watchAd() {
-            if (!user_id) getUserId();
-            window.open(`https://test.adsgram.ai/reward?userid=${user_id}`, "_blank");
-
-            setTimeout(() => {
-                lives = Math.min(3, lives + 1);
-                document.getElementById('gameOverModal').style.display = 'none';
-                setup();
-                gamePlaying = true;
-                render();
-            }, 5000);
-        }
-
-        function exitGame() {
-            location.reload();
-        }
-
-        img.onload = () => document.getElementById('homeScreen').style.display = "flex";
-        document.addEventListener('click', () => gamePlaying = true);
-        window.onclick = () => flight = jump;
-
-    </script>
+      });
+      
+      if (gamePlaying) {
+        ctx.drawImage(img, 432, Math.floor((currentScore % 9) / 3) * size[1], ...size, cTenth, flyHeight, ...size);
+        flight += gravity;
+        flyHeight = Math.min(flyHeight + flight, canvas.height - size[1]);
+      } else {
+        ctx.drawImage(img, 432, 0, ...size, (canvas.width / 2) - size[0] / 2, flyHeight, ...size);
+      }
+      
+      document.getElementById('bestScore').innerText = `Best: ${bestScore}`;
+      document.getElementById('currentScore').innerText = `Current: ${currentScore}`;
+      document.getElementById('lives').innerText = `Lives: ${lives}`;
+      requestAnimationFrame(render);
+    }
+    
+    function startGame() {
+      document.getElementById('homeScreen').style.display = "none";
+      gamePlaying = true;
+      getUserId();
+      setup();
+      render();
+    }
+    
+    function watchAd() {
+      if (!playerId) getUserId();
+      window.open(`https://test.adsgram.ai/reward?userid=${playerId}`, "_blank");
+      
+      setTimeout(() => {
+        lives = Math.min(3, lives + 1);
+        document.getElementById('gameOverModal').style.display = 'none';
+        setup();
+        gamePlaying = true;
+        render();
+      }, 5000);
+    }
+    
+    function exitGame() {
+      location.reload();
+    }
+    
+    function showLeaderboard() {
+      document.getElementById('leaderboardModal').style.display = 'block';
+      displayLeaderboard();
+    }
+    
+    function closeLeaderboard() {
+      document.getElementById('leaderboardModal').style.display = 'none';
+    }
+    
+    function displayLeaderboard() {
+      const leaderboardList = document.getElementById('leaderboardList');
+      leaderboardList.innerHTML = '';
+      leaderboardData.forEach((entry, index) => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `${index + 1}. Player ${entry.playerId}: ${entry.score}`;
+        leaderboardList.appendChild(listItem);
+      });
+    }
+    
+    function submitScore() {
+      leaderboardData.push({ playerId: playerId, score: currentScore });
+      leaderboardData.sort((a, b) => b.score - a.score);
+      if (leaderboardData.length > 10) {
+        leaderboardData.pop();
+      }
+      displayLeaderboard();
+    }
+    
+    img.onload = () => document.getElementById('homeScreen').style.display = "flex";
+    document.addEventListener('click', () => gamePlaying = true);
+    window.onclick = () => flight = jump;
+  </script>
+  
 </body>
+
 </html>
