@@ -23,27 +23,27 @@
     
     <div class="curtain-menu" id="curtain-menu">
       <div class="menu-content">
-
-  <div class="div">
-
-    <h2 a>Menu</h2>
-    <button id="close-menu" class="inner-button">&#111;</button>
-    </div>
+        
+        <div class="div">
+          
+          <h2 a>Menu</h2>
+          <button id="close-menu" class="inner-button">&#111;</button>
+        </div>
         <ul>
-        <!-- <li  class="q"><a href="#"   class="w">Home</a></li>
+          <!-- <li  class="q"><a href="#"   class="w">Home</a></li>
           <li class="q"><a href="#" class="w">About</a></li>
           <li class="q"><a href="#" class="w">Services</a></li>
           <li class="q"><a href="#" class="w">Contact</a></li> --->
           
-       
+          
         </ul>
-           <div class="chat-data">
-     
-   </div>
+        <div class="chat-data">
+          
+        </div>
       </div>
     </div>
     
-     <a href="#" class="menu-button" id="click"> =</a>
+    <a href="#" class="menu-button" id="click"> =</a>
   </header>
   
   
@@ -53,20 +53,29 @@
     
     <div id="header"> print.ai</div>
     
+    
   </div>
+  
+  
+  <div id="myModal" class="modal">
+    <div class="add-content"> <span class="close" id="closeModalBtn">&times;</span>
+      <p>Modal content here...</p>
+    </div>
+  </div>
+  
+  
   
   <div id="input-container">
     
-    <a href="+" class="option"> +</a>
+    <a href="#" class="option" id="openModalLink">+</a>
+    
     
     
     <input type="text" id="user-input" placeholder="Type a message..." />
     
-    <button  id="send-btn">Send</button>
+    <button id="send-btn">Send</button>
   </div>
-  
-  
-  
+  </div>
   
   
   
@@ -89,7 +98,7 @@
       const requestBody = {
         model: "gpt-4o",
         messages: [{ role: "user", content: message }],
-        max_tokens: 512,
+        max_tokens: 5120,
         stream: false
       };
       
