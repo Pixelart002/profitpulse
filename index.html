@@ -6,8 +6,8 @@
   <title>AI Blogging Assistant</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-  <script src="https://apis.google.com/js/api.js"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer onload="gisLoaded()"></script>
   <style>
     .glass {
       backdrop-filter: blur(10px);
@@ -20,11 +20,6 @@
     @keyframes blink {
       0%, 100% { opacity: 0.2; }
       50% { opacity: 1; }
-    }
-    .editable-heading {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
     }
   </style>
 </head>
@@ -135,28 +130,38 @@
           body: JSON.stringify({
             model: model,
             messages: [
-              { role: "system", content: `You are a smart AI blogging assistant...` },
-              { role: "user", content: `Write a detailed, SEO-optimized blog article on: ${topic}` }
+              {
+                role: "system",
+                content: `You are a smart AI blogging assistant...`
+              },
+              {
+                role: "user",
+                content: `Write a detailed, SEO-optimized blog article on: ${topic}`,
+              },
             ],
             max_tokens: 2048,
             temperature: 0.85,
             top_p: 1,
             frequency_penalty: 0,
             presence_penalty: 0.3,
-            stream: false
-          })
+            stream: false,
+          }),
         });
 
         const data = await response.json();
         const outputText = data?.choices?.[0]?.message?.content || 'No response text found.';
-        const title = outputText.split('\n')[0] || 'Generated Blog Title';
+
+        const title = outputText.split('\n').find(line => line.trim().length > 0) || 'Generated Blog Title';
         const content = outputText;
 
         result.innerHTML = `
-          <input value="${title}" class="w-full text-xl font-bold p-2 mb-2 bg-gray-800 text-white rounded" />
-          <textarea class="w-full p-3 h-64 bg-gray-900 text-white rounded mb-4">${content}</textarea>
-          <button onclick="publishToBlogger('${title.replace(/'/g, "\\'")}')" class="bg-green-600 px-4 py-2 rounded">Publish to Blogger</button>
-        `;
+          <input id="postTitle" value="${title}" class="w-full text-xl font-bold p-2 mb-2 bg-gray-800 text-white rounded" />
+          <textarea id="postContent" class="w-full p-3 h-64 bg-gray-900 text-white rounded mb-2">${content}</textarea>
+          <input id="youtubeUrl" type="text" placeholder="Optional YouTube Video URL" class="w-full mb-2 p-2 rounded bg-gray-800 text-white" />
+          <input id="tags" type="text" placeholder="Optional Tags (comma-separated)" class="w-full mb-2 p-2 rounded bg-gray-800 text-white" />
+          <input id="scheduleDate" type="datetime-local" class="w-full mb-4 p-2 rounded bg-gray-800 text-white" />
+          <button onclick="publishToBlogger()" class="bg-green-600 px-4 py-2 rounded">Publish to Blogger</button>`;
+
         resultModal.classList.remove('hidden');
       } catch (error) {
         result.innerHTML = `<p class="text-red-500">Error: ${error.message}</p>`;
@@ -166,14 +171,22 @@
       }
     }
 
-    async function publishToBlogger(title) {
+    async function publishToBlogger() {
       const blogId = document.getElementById('blogSelect').value;
-      const content = document.querySelector('#result textarea').value;
+      const title = document.getElementById('postTitle').value;
+      let content = document.getElementById('postContent').value;
+      const videoUrl = document.getElementById('youtubeUrl').value;
+      const tags = document.getElementById('tags').value.split(',').map(t => t.trim()).filter(t => t);
+      const scheduleDate = document.getElementById('scheduleDate').value;
+
+      if (videoUrl) content += `\n\n<iframe width="100%" height="315" src="${videoUrl}" frameborder="0" allowfullscreen></iframe>`;
 
       const post = {
         blog: { id: blogId },
         title: title,
-        content: content
+        content: content,
+        labels: tags.length ? tags : undefined,
+        published: scheduleDate ? new Date(scheduleDate).toISOString() : undefined
       };
 
       try {
@@ -183,11 +196,6 @@
         alert('Failed to publish: ' + err.message);
       }
     }
-
-    window.onload = () => {
-      gapiLoaded();
-      gisLoaded();
-    };
   </script>
 </body>
 </html>
