@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kyro AI Auth</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom right, #1e3a8a, #2563eb);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      background-color: #1e3a8a;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      font-size: 1.75rem;
+      font-weight: bold;
+    }
+
+    main.page {
+      flex: 1;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .auth-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .logo {
+      width: 70px;
+      height: 70px;
+      margin-bottom: 1.25rem;
+    }
+
+    .auth-form {
+      width: 100%;
+    }
+
+    .auth-form h2 {
+      margin-bottom: 1rem;
+      text-align: center;
+      color: #1e3a8a;
+    }
+
+    .auth-form input,
+    .auth-form select {
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .auth-form button {
+      width: 100%;
+      padding: 0.75rem;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .auth-form button:hover {
+      background: #1d4ed8;
+    }
+
+    .toggle-mode {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .toggle-mode span {
+      color: #2563eb;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .g_id_signin {
+      display: flex;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+
+    @media (max-width: 500px) {
+      .auth-container {
+        padding: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>Kyro AI</header>
+  <main class="page">
+    <div class="auth-container">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Logo_TV_2015.png" alt="Logo" class="logo" />
+      <form id="auth-form" class="auth-form">
+        <h2 id="form-title">Sign In</h2>
+        <input id="email" type="email" placeholder="Email" required />
+        <input id="password" type="password" placeholder="Password" required />
+
+        <div id="extra-fields" style="display: none;">
+          <input id="fullname" type="text" placeholder="Full Name" required />
+          <select id="role" required>
+            <option value="">Select Role</option>
+            <option value="admin">Admin</option>
+            <option value="user">User</option>
+          </select>
+        </div>
+
+        <button type="submit" id="auth-button">Continue</button>
+        <div class="toggle-mode">
+          <span id="toggle-link">Don't have an account? Sign up</span>
+        </div>
+      </form>
+      <div id="g_id_onload"
+        data-client_id="1047818163471-vdijksv0ta6f0u1msu2e8gvd792097fi.apps.googleusercontent.com"
+        data-callback="handleCredentialResponse"
+        data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin" data-type="standard"></div>
+    </div>
+  </main>
+
+  <script>
+    const form = document.getElementById("auth-form");
+    const authBtn = document.getElementById("auth-button");
+    const extraFields = document.getElementById("extra-fields");
+    const emailInput = document.getElementById("email");
+    const toggleLink = document.getElementById("toggle-link");
+    const formTitle = document.getElementById("form-title");
+
+    let mode = "login";
+
+    const isRegistered = (email) => {
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      return users.some(user => user.email === email);
+    };
+
+    const saveUser = (user) => {
+      const users = JSON.parse(localStorage.getItem("users") || "[]");
+      users.push(user);
+      localStorage.setItem("users", JSON.stringify(users));
+    };
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const fullname = document.getElementById("fullname")?.value;
+      const role = document.getElementById("role")?.value;
+
+      console.log("Form submitted. Mode:", mode);
+
+      if (!email || !password) {
+        return alert("Please enter email and password");
+      }
+
+      if (mode === "login") {
+        if (isRegistered(email)) {
+          console.log("Login successful for:", email);
+          sessionStorage.setItem("user", JSON.stringify({ email }));
+          console.log("User session stored in sessionStorage.");
+          window.location.href = "dashboard.html";
+        } else {
+          console.log("Login failed. User not found:", email);
+          alert("No account found. Switch to signup.");
+        }
+      } else {
+        if (!fullname || !role) {
+          return alert("Please fill in full name and select role.");
+        }
+        const profile = { email, password, fullname, role };
+        saveUser(profile);
+        console.log("Signup successful. User data captured:", profile);
+        sessionStorage.setItem("user", JSON.stringify(profile));
+        console.log("User session stored in sessionStorage.");
+        window.location.href = "dashboard.html";
+      }
+    });
+
+    toggleLink.addEventListener("click", () => {
+      if (mode === "login") {
+        mode = "signup";
+        extraFields.style.display = "block";
+        formTitle.innerText = "Sign Up";
+        toggleLink.innerText = "Already have an account? Login";
+      } else {
+        mode = "login";
+        extraFields.style.display = "none";
+        formTitle.innerText = "Sign In";
+        toggleLink.innerText = "Don't have an account? Sign up";
+      }
+    });
+
+    function handleCredentialResponse(response) {
+      console.log("Google token received:", response.credential);
+      // Verify token (simulate for now)
+      const token = response.credential;
+      if (token) {
+        console.log("Google user verified. Logging in...");
+        sessionStorage.setItem("google_user", JSON.stringify({ token }));
+        window.location.href = "dashboard.html";
+      } else {
+        console.error("Google sign-in failed: Invalid token");
+        alert("Google sign-in failed.");
+      }
+    }
+
+    const user = sessionStorage.getItem("user") || sessionStorage.getItem("google_user");
+    if (user) {
+      console.log("Existing user found in session. Redirecting to dashboard...");
+      window.location.href = "dashboard.html";
+    }
+  </script>
+</body>
+</html>

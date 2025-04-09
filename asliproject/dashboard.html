@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kyro AI Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f0f2f5; }
+
+    header {
+      background-color: #1e3a8a;
+      color: white;
+      padding: 1rem;
+      position: sticky;
+      top: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1001;
+    }
+
+    .menu-btn {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .side-menu {
+      position: fixed;
+      top: 4rem;
+      left: -80%;
+      width: 80%;
+      height: calc(100% - 4rem);
+      background-color: white;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+      transition: left 0.3s;
+      z-index: 1000;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .side-menu.active {
+      left: 0;
+    }
+
+    .side-menu .menu-items {
+      flex: 1;
+    }
+
+    .side-menu button {
+      display: block;
+      margin: 1rem 0;
+      padding: 0.75rem;
+      width: 100%;
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-weight: bold;
+    }
+
+    .legend-line {
+      width: 100%;
+      height: 2px;
+      background-color: black;
+      margin: 0.5rem 0;
+    }
+
+    .social-icons {
+      display: flex;
+      justify-content: space-around;
+      padding: 1rem 0 0.5rem;
+    }
+
+    .social-icons a {
+      color: #1e3a8a;
+      font-size: 1.5rem;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 0.5rem;
+    }
+
+    main {
+      padding: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span>Kyro AI Dashboard</span>
+    <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+  </header>
+
+  <div class="side-menu" id="sideMenu">
+    <div class="menu-items">
+      <button onclick="loadProfile()">Profile</button>
+      <button onclick="enableEdit()">Settings</button>
+    </div>
+    <div>
+      <div class="legend-line"></div>
+      <div class="social-icons">
+        <a href="#"><i class="fab fa-instagram"></i></a>
+        <a href="#"><i class="fab fa-youtube"></i></a>
+        <a href="#"><i class="fab fa-twitter"></i></a>
+        <a href="#"><i class="fab fa-blogger"></i></a>
+      </div>
+      <div class="footer-note">&copy; Kyro. All rights reserved.</div>
+    </div>
+  </div>
+
+  <main>
+    <h2>Welcome to your dashboard</h2>
+    <div id="profile-section"></div>
+  </main>
+
+  <script>
+    function toggleMenu() {
+      document.getElementById('sideMenu').classList.toggle('active');
+    }
+
+    function loadProfile() {
+      const user = JSON.parse(sessionStorage.getItem('user'));
+      if (!user) return alert('No user found');
+
+      const section = document.getElementById('profile-section');
+      section.innerHTML = `
+        <h3>Your Profile</h3>
+        <p><strong>Name:</strong> <span id="profile-name">${user.fullname}</span></p>
+        <p><strong>Email:</strong> <span>${user.email}</span></p>
+        <p><strong>Role:</strong> <span id="profile-role">${user.role}</span></p>
+      `;
+    }
+
+    function enableEdit() {
+      const name = prompt('Enter new full name:');
+      const role = prompt('Enter new role (admin/user):');
+      if (name && role) {
+        const user = JSON.parse(sessionStorage.getItem('user'));
+        user.fullname = name;
+        user.role = role;
+        sessionStorage.setItem('user', JSON.stringify(user));
+        alert('Profile updated.');
+        loadProfile();
+      }
+    }
+
+    if (sessionStorage.getItem('user')) {
+      loadProfile();
+    }
+  </script>
+</body>
+</html>
