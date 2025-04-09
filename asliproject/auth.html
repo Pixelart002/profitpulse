@@ -206,6 +206,7 @@
           const { error: insertError } = await supabase.from('users').insert([{ email, fullname, role }]);
           if (insertError) {
             console.error("Data insert failed:", insertError.message);
+            alert("Data insert failed: " + insertError.message);
           } else {
             console.log("Data inserted into users table successfully");
           }
