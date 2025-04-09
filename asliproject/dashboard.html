@@ -1,162 +1,213 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kyro AI Dashboard</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <title>Kyro Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Arial, sans-serif; background: #f0f2f5; }
-
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef2f7;
+      margin: 0;
+    }
     header {
-      background-color: #1e3a8a;
-      color: white;
-      padding: 1rem;
-      position: sticky;
-      top: 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      z-index: 1001;
+      padding: 1rem 2rem;
+      background: white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-
-    .menu-btn {
-      background: transparent;
-      border: none;
-      color: white;
+    header h1 {
+      margin: 0;
       font-size: 1.5rem;
+      color: #333;
+    }
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
       cursor: pointer;
     }
-
-    .side-menu {
-      position: fixed;
-      top: 4rem;
-      left: -80%;
-      width: 80%;
-      height: calc(100% - 4rem);
-      background-color: white;
-      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
-      transition: left 0.3s;
-      z-index: 1000;
-      padding: 1rem;
+    .menu-toggle div {
+      width: 25px;
+      height: 3px;
+      background-color: #333;
+    }
+    .menu {
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      padding: 1rem 2rem;
     }
-
-    .side-menu.active {
-      left: 0;
-    }
-
-    .side-menu .menu-items {
-      flex: 1;
-    }
-
-    .side-menu button {
-      display: block;
-      margin: 1rem 0;
-      padding: 0.75rem;
-      width: 100%;
-      background-color: #2563eb;
-      color: white;
-      border: none;
-      border-radius: 0.5rem;
+    .menu a {
+      margin-left: 10px;
+      text-decoration: none;
+      color: #333;
       font-weight: bold;
+      padding: 10px 20px;
+      background: #fff;
+      border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
-
-    .legend-line {
+    .menu a:hover {
+      background-color: #f0f0f0;
+    }
+    .curtain {
+      display: none;
+      flex-direction: column;
+      padding: 1rem 2rem;
+      background: white;
+    }
+    .curtain a {
+      margin: 5px 0;
+    }
+    .section {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 500px;
+      margin: 2rem auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      display: none;
+    }
+    .section.active {
+      display: block;
+    }
+    input, select {
       width: 100%;
-      height: 2px;
-      background-color: black;
-      margin: 0.5rem 0;
+      padding: 10px;
+      margin-top: 10px;
     }
-
-    .social-icons {
-      display: flex;
-      justify-content: space-around;
-      padding: 1rem 0 0.5rem;
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
     }
-
-    .social-icons a {
-      color: #1e3a8a;
-      font-size: 1.5rem;
-    }
-
-    .footer-note {
-      text-align: center;
-      font-size: 0.8rem;
-      color: #888;
-      margin-top: 0.5rem;
-    }
-
-    main {
-      padding: 2rem;
+    @media (max-width: 600px) {
+      .menu {
+        display: none;
+      }
+      .menu-toggle {
+        display: flex;
+      }
+      .curtain {
+        display: flex;
+      }
     }
   </style>
 </head>
 <body>
   <header>
-    <span>Kyro AI Dashboard</span>
-    <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+    <h1>Kyro AI</h1>
+    <div class="menu-toggle" onclick="toggleCurtain()">
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
   </header>
 
-  <div class="side-menu" id="sideMenu">
-    <div class="menu-items">
-      <button onclick="loadProfile()">Profile</button>
-      <button onclick="enableEdit()">Settings</button>
+  <nav class="menu">
+    <a href="#" onclick="showSection('profile')">Profile</a>
+    <a href="#" onclick="showSection('settings')">Settings</a>
+    <a href="#" onclick="logout()">Logout</a>
+  </nav>
+
+  <nav class="curtain" id="curtainMenu">
+    <a href="#" onclick="showSection('profile')">Profile</a>
+    <a href="#" onclick="showSection('settings')">Settings</a>
+    <a href="#" onclick="logout()">Logout</a>
+  </nav>
+
+  <div id="profile" class="section">
+    <h3>Your Profile</h3>
+    <div style="margin-bottom: 1rem;">
+      <label>Email:</label>
+      <div style="padding: 10px; background: #f9f9f9; border-radius: 5px;" id="email"></div>
     </div>
-    <div>
-      <div class="legend-line"></div>
-      <div class="social-icons">
-        <a href="#"><i class="fab fa-instagram"></i></a>
-        <a href="#"><i class="fab fa-youtube"></i></a>
-        <a href="#"><i class="fab fa-twitter"></i></a>
-        <a href="#"><i class="fab fa-blogger"></i></a>
-      </div>
-      <div class="footer-note">&copy; Kyro. All rights reserved.</div>
+    <div style="margin-bottom: 1rem;">
+      <label>Full Name:</label>
+      <div style="padding: 10px; background: #f9f9f9; border-radius: 5px;" id="fullname"></div>
+    </div>
+    <div style="margin-bottom: 1rem;">
+      <label>Role:</label>
+      <div style="padding: 10px; background: #f9f9f9; border-radius: 5px;" id="role"></div>
     </div>
   </div>
 
-  <main>
-    <h2>Welcome to your dashboard</h2>
-    <div id="profile-section"></div>
-  </main>
+  <div id="settings" class="section">
+    <h3>Edit Profile</h3>
+    <input type="text" id="editFullName" placeholder="Full Name" />
+    <select id="editRole">
+      <option value="">Select Role</option>
+      <option value="user">User</option>
+      <option value="admin">Admin</option>
+    </select>
+    <button onclick="saveChanges()">Save Changes</button>
+  </div>
 
   <script>
-    function toggleMenu() {
-      document.getElementById('sideMenu').classList.toggle('active');
-    }
+    const supabase = window.supabase.createClient(
+      'https://wqxlakambzrebifqszbo.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxeGxha2FtYnpyZWJpZnFzemJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxOTAzMjcsImV4cCI6MjA1OTc2NjMyN30.kIEpEt84s5sRAPmaN7Vb2oQCnXIHnKVxPFXD5gDqNuQ'
+    );
 
-    function loadProfile() {
-      const user = JSON.parse(sessionStorage.getItem('user'));
-      if (!user) return alert('No user found');
+    const userData = JSON.parse(sessionStorage.getItem('user'));
+    const email = userData?.user?.email;
 
-      const section = document.getElementById('profile-section');
-      section.innerHTML = `
-        <h3>Your Profile</h3>
-        <p><strong>Name:</strong> <span id="profile-name">${user.fullname}</span></p>
-        <p><strong>Email:</strong> <span>${user.email}</span></p>
-        <p><strong>Role:</strong> <span id="profile-role">${user.role}</span></p>
-      `;
-    }
+    async function fetchUserData() {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', email)
+        .single();
 
-    function enableEdit() {
-      const name = prompt('Enter new full name:');
-      const role = prompt('Enter new role (admin/user):');
-      if (name && role) {
-        const user = JSON.parse(sessionStorage.getItem('user'));
-        user.fullname = name;
-        user.role = role;
-        sessionStorage.setItem('user', JSON.stringify(user));
-        alert('Profile updated.');
-        loadProfile();
+      if (data) {
+        document.getElementById('email').textContent = email;
+        document.getElementById('fullname').textContent = data.fullname;
+        document.getElementById('role').textContent = data.role;
+
+        document.getElementById('editFullName').value = data.fullname;
+        document.getElementById('editRole').value = data.role;
+      } else {
+        alert("Error loading profile");
       }
     }
 
-    if (sessionStorage.getItem('user')) {
-      loadProfile();
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
     }
+
+    async function saveChanges() {
+      const fullname = document.getElementById('editFullName').value;
+      const role = document.getElementById('editRole').value;
+
+      const { error } = await supabase
+        .from('users')
+        .update({ fullname, role })
+        .eq('email', email);
+
+      if (error) {
+        alert("Update failed: " + error.message);
+      } else {
+        alert("Profile updated!");
+        fetchUserData();
+        showSection('profile');
+      }
+    }
+
+    function logout() {
+      sessionStorage.clear();
+      window.location.href = "/asliproject/";
+    }
+
+    function toggleCurtain() {
+      const curtain = document.getElementById('curtainMenu');
+      curtain.style.display = curtain.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    fetchUserData();
+    showSection('profile');
   </script>
 </body>
 </html>
