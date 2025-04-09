@@ -132,10 +132,12 @@
   </main>
 
   <script>
-    const supabaseClient = supabase.createClient(
+    console.log("Initializing Supabase client...");
+    const supabase = window.supabase.createClient(
       'https://wqxlakambzrebifqszbo.supabase.co',
-      'YOUR_SUPABASE_ANON_KEY'
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxeGxha2FtYnpyZWJpZnFzemJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxOTAzMjcsImV4cCI6MjA1OTc2NjMyN30.kIEpEt84s5sRAPmaN7Vb2oQCnXIHnKVxPFXD5gDqNuQ'
     );
+    console.log("Supabase client initialized.");
 
     const form = document.getElementById("auth-form");
     const extraFields = document.getElementById("extra-fields");
@@ -145,6 +147,7 @@
 
     toggleLink.addEventListener("click", () => {
       mode = mode === "login" ? "signup" : "login";
+      console.log("Toggled mode:", mode);
       formTitle.textContent = mode === "login" ? "Sign In" : "Sign Up";
       extraFields.style.display = mode === "signup" ? "block" : "none";
       toggleLink.textContent = mode === "login"
@@ -159,39 +162,52 @@
       const fullname = document.getElementById("fullname")?.value;
       const role = document.getElementById("role")?.value;
 
-      if (!email || !password) return alert("Please enter email and password");
+      console.log("Form submitted with mode:", mode);
+
+      if (!email || !password) {
+        alert("Please enter email and password");
+        return;
+      }
 
       if (mode === "login") {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({
-          email,
-          password
-        });
-        if (error) return alert("Login failed: " + error.message);
+        console.log("Attempting login for:", email);
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          console.error("Login failed:", error.message);
+          alert("Login failed: " + error.message);
+          return;
+        }
+        console.log("Login successful:", data);
         sessionStorage.setItem("user", JSON.stringify(data));
-        window.location.href = "dashboard.html";
+        window.location.href = "/asliproject/dashboard.html";
       } else {
-        if (!fullname || !role) return alert("Please fill in full name and role");
-
-        const { data: signupData, error: signupError } = await supabaseClient.auth.signUp({
-          email,
-          password
-        });
-        if (signupError) return alert("Signup failed: " + signupError.message);
-
-        await supabaseClient.from('users').insert([{ email, fullname, role }]);
+        if (!fullname || !role) {
+          alert("Please fill in full name and role");
+          return;
+        }
+        console.log("Attempting signup for:", email);
+        const { data: signupData, error: signupError } = await supabase.auth.signUp({ email, password });
+        if (signupError) {
+          console.error("Signup failed:", signupError.message);
+          alert("Signup failed: " + signupError.message);
+          return;
+        }
+        console.log("Signup successful:", signupData);
+        await supabase.from('users').insert([{ email, fullname, role }]);
         sessionStorage.setItem("user", JSON.stringify(signupData));
-        window.location.href = "dashboard.html";
+        window.location.href = "/asliproject/dashboard.html";
       }
     });
 
     function handleCredentialResponse(response) {
       console.log("Google token:", response.credential);
-      // Add Google OAuth handling logic here if needed.
+      // Google login handler (extend if needed)
     }
 
     const existingUser = sessionStorage.getItem("user");
     if (existingUser) {
-      window.location.href = "dashboard.html";
+      console.log("Existing session found. Redirecting to dashboard...");
+      window.location.href = "/asliproject/dashboard.html";
     }
   </script>
 </body>
