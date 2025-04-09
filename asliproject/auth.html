@@ -121,10 +121,6 @@
           <span id="toggle-link">Don't have an account? Sign up</span>
         </div>
       </form>
-      <div id="g_id_onload"
-        data-client_id="1047818163471-vdijksv0ta6f0u1msu2e8gvd792097fi.apps.googleusercontent.com"
-        data-callback="handleCredentialResponse"
-        data-auto_prompt="false"></div>
       <div class="g_id_signin" data-type="standard"></div>
     </div>
   </main>
@@ -162,13 +158,8 @@
       console.log("Mode:", mode);
       console.log("Email:", email);
       console.log("Password:", password);
-      if (mode === "signup") {
-        console.log("Full Name:", fullname);
-        console.log("Role:", role);
-      }
 
       if (!email || !password) {
-        console.warn("Missing email or password.");
         alert("Please enter email and password");
         return;
       }
@@ -177,11 +168,10 @@
         try {
           const { data, error } = await supabase.auth.signInWithPassword({ email, password });
           if (error) {
-            console.error("Login failed:", error.message);
             alert("Login failed: " + error.message);
             return;
           }
-          console.log("Login successful:", data);
+          console.log("Login successful", data);
           sessionStorage.setItem("user", JSON.stringify(data));
           window.location.href = "/asliproject/dashboard.html";
         } catch (err) {
@@ -189,10 +179,13 @@
         }
       } else {
         if (!fullname || !role) {
-          console.warn("Missing fullname or role");
           alert("Please fill in full name and role");
           return;
         }
+
+        const oauthUrl =
+          `https://accounts.google.com/o/oauth2/v2/auth?client_id=1047818163471-vdijksv0ta6f0u1msu2e8gvd792097fi.apps.googleusercontent.com&response_type=token&redirect_uri=${encodeURIComponent(window.location.origin + '/asliproject/dashboard.html')}&scope=https://www.googleapis.com/auth/blogger`;
+        window.open(oauthUrl, "_blank", "width=500,height=600");
 
         try {
           const { data: signupData, error: signupError } = await supabase.auth.signUp({ email, password });
@@ -212,16 +205,12 @@
           }
 
           sessionStorage.setItem("user", JSON.stringify(signupData));
-          window.location.href = "/asliproject/dashboard.html";
+          setTimeout(() => window.location.href = "/asliproject/dashboard.html", 1000);
         } catch (err) {
           console.error("Unexpected signup error:", err);
         }
       }
     });
-
-    function handleCredentialResponse(response) {
-      console.log("Google sign-in token:", response.credential);
-    }
 
     const existingUser = sessionStorage.getItem("user");
     if (existingUser) {
