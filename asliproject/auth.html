@@ -108,7 +108,6 @@
         <h2 id="form-title">Sign In</h2>
         <input id="email" type="email" placeholder="Email" required />
         <input id="password" type="password" placeholder="Password" required />
-
         <div id="extra-fields" style="display: none;">
           <input id="fullname" type="text" placeholder="Full Name" required />
           <select id="role" required>
@@ -117,7 +116,6 @@
             <option value="user">User</option>
           </select>
         </div>
-
         <button type="submit" id="auth-button">Continue</button>
         <div class="toggle-mode">
           <span id="toggle-link">Don't have an account? Sign up</span>
@@ -132,12 +130,10 @@
   </main>
 
   <script>
-    console.log("Initializing Supabase client...");
     const supabase = window.supabase.createClient(
       'https://wqxlakambzrebifqszbo.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxeGxha2FtYnpyZWJpZnFzemJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxOTAzMjcsImV4cCI6MjA1OTc2NjMyN30.kIEpEt84s5sRAPmaN7Vb2oQCnXIHnKVxPFXD5gDqNuQ'
     );
-    console.log("Supabase client initialized.");
 
     const form = document.getElementById("auth-form");
     const extraFields = document.getElementById("extra-fields");
@@ -147,12 +143,12 @@
 
     toggleLink.addEventListener("click", () => {
       mode = mode === "login" ? "signup" : "login";
-      console.log("Toggled mode:", mode);
       formTitle.textContent = mode === "login" ? "Sign In" : "Sign Up";
       extraFields.style.display = mode === "signup" ? "block" : "none";
       toggleLink.textContent = mode === "login"
         ? "Don't have an account? Sign up"
         : "Already have an account? Login";
+      console.log("Toggled auth mode:", mode);
     });
 
     form.addEventListener("submit", async (e) => {
@@ -162,51 +158,73 @@
       const fullname = document.getElementById("fullname")?.value;
       const role = document.getElementById("role")?.value;
 
-      console.log("Form submitted with mode:", mode);
+      console.log("Form submitted");
+      console.log("Mode:", mode);
+      console.log("Email:", email);
+      console.log("Password:", password);
+      if (mode === "signup") {
+        console.log("Full Name:", fullname);
+        console.log("Role:", role);
+      }
 
       if (!email || !password) {
+        console.warn("Missing email or password.");
         alert("Please enter email and password");
         return;
       }
 
       if (mode === "login") {
-        console.log("Attempting login for:", email);
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          console.error("Login failed:", error.message);
-          alert("Login failed: " + error.message);
-          return;
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) {
+            console.error("Login failed:", error.message);
+            alert("Login failed: " + error.message);
+            return;
+          }
+          console.log("Login successful:", data);
+          sessionStorage.setItem("user", JSON.stringify(data));
+          window.location.href = "/asliproject/dashboard.html";
+        } catch (err) {
+          console.error("Unexpected login error:", err);
         }
-        console.log("Login successful:", data);
-        sessionStorage.setItem("user", JSON.stringify(data));
-        window.location.href = "/asliproject/dashboard.html";
       } else {
         if (!fullname || !role) {
+          console.warn("Missing fullname or role");
           alert("Please fill in full name and role");
           return;
         }
-        console.log("Attempting signup for:", email);
-        const { data: signupData, error: signupError } = await supabase.auth.signUp({ email, password });
-        if (signupError) {
-          console.error("Signup failed:", signupError.message);
-          alert("Signup failed: " + signupError.message);
-          return;
+
+        try {
+          const { data: signupData, error: signupError } = await supabase.auth.signUp({ email, password });
+          if (signupError) {
+            console.error("Signup failed:", signupError.message);
+            alert("Signup failed: " + signupError.message);
+            return;
+          }
+          console.log("Signup successful:", signupData);
+
+          const { error: insertError } = await supabase.from('users').insert([{ email, fullname, role }]);
+          if (insertError) {
+            console.error("Data insert failed:", insertError.message);
+          } else {
+            console.log("Data inserted into users table successfully");
+          }
+
+          sessionStorage.setItem("user", JSON.stringify(signupData));
+          window.location.href = "/asliproject/dashboard.html";
+        } catch (err) {
+          console.error("Unexpected signup error:", err);
         }
-        console.log("Signup successful:", signupData);
-        await supabase.from('users').insert([{ email, fullname, role }]);
-        sessionStorage.setItem("user", JSON.stringify(signupData));
-        window.location.href = "/asliproject/dashboard.html";
       }
     });
 
     function handleCredentialResponse(response) {
-      console.log("Google token:", response.credential);
-      // Google login handler (extend if needed)
+      console.log("Google sign-in token:", response.credential);
     }
 
     const existingUser = sessionStorage.getItem("user");
     if (existingUser) {
-      console.log("Existing session found. Redirecting to dashboard...");
+      console.log("User already logged in. Redirecting to dashboard.");
       window.location.href = "/asliproject/dashboard.html";
     }
   </script>
