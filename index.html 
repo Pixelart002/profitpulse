@@ -7,27 +7,6 @@
   <title>AI Blogging Assistant</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-  <script>
-    function gapiLoaded() {
-      gapi.load('client', async () => {
-        await gapi.client.init({ discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/blogger/v3/rest"] });
-      });
-    }
-    
-    function gisLoaded() {
-      tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: CLIENT_ID,
-        scope: SCOPES,
-        callback: async (tokenResponse) => {
-          gapi.client.setToken(tokenResponse);
-          document.getElementById('editor').style.display = 'block';
-          loadUserBlogs();
-        }
-      });
-    }
-  </script>
-  <script src="https://apis.google.com/js/api.js" onload="gapiLoaded()" async defer></script>
-  <script src="https://accounts.google.com/gsi/client" onload="gisLoaded()" async defer></script>
   <style>
     .glass {
       backdrop-filter: blur(10px);
@@ -103,12 +82,37 @@
     
     let tokenClient;
     
+    function gapiLoaded() {
+      window.gapi.load('client', async () => {
+        await window.gapi.client.init({
+          discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/blogger/v3/rest"]
+        });
+      });
+    }
+    
+    function gisLoaded() {
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPES,
+        callback: async (tokenResponse) => {
+          window.gapi.client.setToken(tokenResponse);
+          document.getElementById('editor').style.display = 'block';
+          loadUserBlogs();
+        },
+        // Netlify domain origin
+        ux_mode: 'popup',
+        login_hint: '',
+        hosted_domain: '',
+        prompt: '',
+      });
+    }
+    
     function handleAuthClick() {
       tokenClient.requestAccessToken();
     }
     
     async function loadUserBlogs() {
-      const res = await gapi.client.blogger.blogs.listByUser({ userId: 'self' });
+      const res = await window.gapi.client.blogger.blogs.listByUser({ userId: 'self' });
       const blogs = res.result.items;
       const select = document.getElementById('blogSelect');
       select.innerHTML = '';
@@ -203,13 +207,20 @@
       };
       
       try {
-        await gapi.client.blogger.posts.insert({ blogId, resource: post });
+        await window.gapi.client.blogger.posts.insert({ blogId, resource: post });
         alert('Post published successfully!');
       } catch (err) {
         alert('Failed to publish: ' + err.message);
       }
     }
+    
+    
+    
+    
   </script>
+  
+  <script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer onload="gisLoaded()"></script>
 </body>
 
 </html>
