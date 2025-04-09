@@ -7,123 +7,54 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to bottom right, #1e3a8a, #2563eb);
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
       display: flex;
       flex-direction: column;
       align-items: center;
-    }
-    header {
-      width: 100%;
-      background-color: #1e3a8a;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.75rem;
-      font-weight: bold;
-    }
-    main.page {
-      flex: 1;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
+      padding: 2rem;
     }
     .auth-container {
       background: white;
       padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
       width: 100%;
       max-width: 400px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
     }
-    .logo {
-      width: 70px;
-      height: 70px;
-      margin-bottom: 1.25rem;
-    }
-    .auth-form {
+    .auth-form input, .auth-form select, .auth-form button {
       width: 100%;
-    }
-    .auth-form h2 {
-      margin-bottom: 1rem;
-      text-align: center;
-      color: #1e3a8a;
-    }
-    .auth-form input,
-    .auth-form select {
-      width: 100%;
-      padding: 0.75rem;
-      margin-bottom: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 0.5rem;
-      font-size: 1rem;
-    }
-    .auth-form button {
-      width: 100%;
-      padding: 0.75rem;
-      background: #2563eb;
-      color: white;
-      border: none;
-      border-radius: 0.5rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .auth-form button:hover {
-      background: #1d4ed8;
-    }
-    .toggle-mode {
-      margin-top: 1rem;
-      font-size: 0.9rem;
-      text-align: center;
-    }
-    .toggle-mode span {
-      color: #2563eb;
-      cursor: pointer;
-      font-weight: 600;
+      margin: 10px 0;
+      padding: 10px;
     }
     .g_id_signin {
-      display: flex;
-      justify-content: center;
-      margin-top: 1.5rem;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <header>Kyro AI</header>
-  <main class="page">
-    <div class="auth-container">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Logo_TV_2015.png" alt="Logo" class="logo" />
-      <form id="auth-form" class="auth-form">
-        <h2 id="form-title">Sign In</h2>
-        <input id="email" type="email" placeholder="Email" required />
-        <input id="password" type="password" placeholder="Password" required />
-        <div id="extra-fields" style="display: none;">
-          <input id="fullname" type="text" placeholder="Full Name" required />
-          <select id="role" required>
-            <option value="">Select Role</option>
-            <option value="admin">Admin</option>
-            <option value="user">User</option>
-          </select>
-        </div>
-        <button type="submit" id="auth-button">Continue</button>
-        <div class="toggle-mode">
-          <span id="toggle-link">Don't have an account? Sign up</span>
-        </div>
-      </form>
-      <div class="g_id_signin" data-type="standard"></div>
-    </div>
-  </main>
+  <h2>Kyro Auth</h2>
+  <div class="auth-container">
+    <form id="auth-form" class="auth-form">
+      <h3 id="form-title">Sign In</h3>
+      <input id="email" type="email" placeholder="Email" required />
+      <input id="password" type="password" placeholder="Password" required />
+      <div id="extra-fields" style="display:none;">
+        <input id="fullname" type="text" placeholder="Full Name" />
+        <select id="role">
+          <option value="">Select Role</option>
+          <option value="admin">Admin</option>
+          <option value="user">User</option>
+        </select>
+      </div>
+      <button type="submit" id="auth-button">Continue</button>
+      <p class="toggle-mode"><span id="toggle-link">Don't have an account? Sign up</span></p>
+    </form>
+
+    <hr />
+    <div class="g_id_signin" id="gSignInDiv"></div>
+  </div>
 
   <script>
     const supabase = window.supabase.createClient(
@@ -131,88 +62,93 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxeGxha2FtYnpyZWJpZnFzemJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxOTAzMjcsImV4cCI6MjA1OTc2NjMyN30.kIEpEt84s5sRAPmaN7Vb2oQCnXIHnKVxPFXD5gDqNuQ'
     );
 
+    let mode = "login";
     const form = document.getElementById("auth-form");
     const extraFields = document.getElementById("extra-fields");
-    const formTitle = document.getElementById("form-title");
     const toggleLink = document.getElementById("toggle-link");
-    let mode = "login";
+    const formTitle = document.getElementById("form-title");
 
-    toggleLink.addEventListener("click", () => {
+    toggleLink.onclick = () => {
       mode = mode === "login" ? "signup" : "login";
       formTitle.textContent = mode === "login" ? "Sign In" : "Sign Up";
       extraFields.style.display = mode === "signup" ? "block" : "none";
-      toggleLink.textContent = mode === "login"
-        ? "Don't have an account? Sign up"
+      toggleLink.textContent = mode === "login" 
+        ? "Don't have an account? Sign up" 
         : "Already have an account? Login";
-      console.log("Toggled auth mode:", mode);
-    });
+    };
 
-    form.addEventListener("submit", async (e) => {
+    form.onsubmit = async (e) => {
       e.preventDefault();
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-      const fullname = document.getElementById("fullname")?.value;
-      const role = document.getElementById("role")?.value;
-
-      console.log("Form submitted");
-      console.log("Mode:", mode);
-      console.log("Email:", email);
-      console.log("Password:", password);
-
-      if (!email || !password) {
-        alert("Please enter email and password");
-        return;
-      }
+      const fullname = document.getElementById("fullname").value;
+      const role = document.getElementById("role").value;
 
       if (mode === "login") {
-        try {
-          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-          if (error) {
-            alert("Login failed: " + error.message);
-            return;
-          }
-          console.log("Login successful", data);
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          alert("Login failed: " + error.message);
+        } else {
           sessionStorage.setItem("user", JSON.stringify(data));
           window.location.href = "/asliproject/dashboard.html";
-        } catch (err) {
-          console.error("Unexpected login error:", err);
         }
       } else {
         if (!fullname || !role) {
-          alert("Please fill in full name and role");
+          alert("Please fill full name and role");
           return;
         }
 
-        try {
-          const { data: signupData, error: signupError } = await supabase.auth.signUp({ email, password });
-          if (signupError) {
-            console.error("Signup failed:", signupError.message);
-            alert("Signup failed: " + signupError.message);
-            return;
-          }
-          console.log("Signup successful:", signupData);
+        const { data: signupData, error: signupError } = await supabase.auth.signUp({ email, password });
+        if (signupError) {
+          alert("Signup failed: " + signupError.message);
+          return;
+        }
 
-          const { error: insertError } = await supabase.from('users').insert([{ email, fullname, role }]);
-          if (insertError) {
-            console.error("Data insert failed:", insertError.message);
-            alert("Data insert failed: " + insertError.message);
-          } else {
-            console.log("Data inserted into users table successfully");
-          }
-
+        const { error: insertError } = await supabase.from("users").insert([{ email, fullname, role }]);
+        if (insertError) {
+          alert("User data insert failed: " + insertError.message);
+        } else {
           sessionStorage.setItem("user", JSON.stringify(signupData));
           window.location.href = "/asliproject/dashboard.html";
-        } catch (err) {
-          console.error("Unexpected signup error:", err);
         }
       }
-    });
+    };
 
-    const existingUser = sessionStorage.getItem("user");
-    if (existingUser) {
-      console.log("User already logged in. Redirecting to dashboard.");
-      window.location.href = "/asliproject/dashboard.html";
-    }
+    // Google Login
+    window.onload = function () {
+      google.accounts.id.initialize({
+        client_id: "1047818163471-vdijksv0ta6f0u1msu2e8gvd792097fi.apps.googleusercontent.com",
+        callback: async (response) => {
+          const { data, error } = await supabase.auth.signInWithIdToken({
+            provider: "google",
+            token: response.credential,
+          });
+
+          if (error) {
+            alert("Google login failed: " + error.message);
+          } else {
+            console.log("Google Login Success", data);
+            const userEmail = data.user.email;
+            const { data: userExists } = await supabase
+              .from("users")
+              .select("*")
+              .eq("email", userEmail);
+
+            if (!userExists || userExists.length === 0) {
+              await supabase.from("users").insert([{ email: userEmail, fullname: data.user.user_metadata.full_name || "", role: "user" }]);
+            }
+
+            sessionStorage.setItem("user", JSON.stringify(data));
+            window.location.href = "/asliproject/dashboard.html";
+          }
+        },
+      });
+
+      google.accounts.id.renderButton(document.getElementById("gSignInDiv"), {
+        theme: "outline",
+        size: "large",
+      });
+    };
   </script>
 </body>
 </html>
