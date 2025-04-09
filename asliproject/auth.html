@@ -156,8 +156,6 @@
 
       console.log("Form submitted");
       console.log("Mode:", mode);
-      console.log("Email:", email);
-      console.log("Password:", password);
 
       if (!email || !password) {
         alert("Please enter email and password");
@@ -171,7 +169,6 @@
             alert("Login failed: " + error.message);
             return;
           }
-          console.log("Login successful", data);
           sessionStorage.setItem("user", JSON.stringify(data));
           window.location.href = "/asliproject/dashboard.html";
         } catch (err) {
@@ -183,6 +180,7 @@
           return;
         }
 
+        // Open Google OAuth window with Blogger scope
         const oauthUrl =
           `https://accounts.google.com/o/oauth2/v2/auth?client_id=1047818163471-vdijksv0ta6f0u1msu2e8gvd792097fi.apps.googleusercontent.com&response_type=token&redirect_uri=${encodeURIComponent(window.location.origin + '/asliproject/dashboard.html')}&scope=https://www.googleapis.com/auth/blogger`;
         window.open(oauthUrl, "_blank", "width=500,height=600");
@@ -190,21 +188,17 @@
         try {
           const { data: signupData, error: signupError } = await supabase.auth.signUp({ email, password });
           if (signupError) {
-            console.error("Signup failed:", signupError.message);
             alert("Signup failed: " + signupError.message);
             return;
           }
-          console.log("Signup successful:", signupData);
 
           const { error: insertError } = await supabase.from('users').insert([{ email, fullname, role }]);
           if (insertError) {
-            console.error("Data insert failed:", insertError.message);
             alert("Data insert failed: " + insertError.message);
-          } else {
-            console.log("Data inserted into users table successfully");
           }
 
           sessionStorage.setItem("user", JSON.stringify(signupData));
+          // Redirect after user closes popup
           setTimeout(() => window.location.href = "/asliproject/dashboard.html", 1000);
         } catch (err) {
           console.error("Unexpected signup error:", err);
