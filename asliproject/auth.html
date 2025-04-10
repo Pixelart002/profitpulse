@@ -11,7 +11,7 @@
     * {
       box-sizing: border-box;
     }
-    
+
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(to right, #667eea, #764ba2);
@@ -23,13 +23,13 @@
       justify-content: center;
       min-height: 100vh;
     }
-    
+
     h2 {
       color: white;
       margin: 1rem;
       text-align: center;
     }
-    
+
     .auth-container {
       background: white;
       padding: 2rem;
@@ -39,19 +39,19 @@
       max-width: 400px;
       animation: fadeIn 0.5s ease-in-out;
     }
-    
+
     @keyframes fadeIn {
       from {
         opacity: 0;
         transform: translateY(-20px);
       }
-      
+
       to {
         opacity: 1;
         transform: translateY(0);
       }
     }
-    
+
     .auth-form input,
     .auth-form select,
     .auth-form button {
@@ -62,7 +62,7 @@
       border: 1px solid #ccc;
       font-size: 1rem;
     }
-    
+
     .auth-form button {
       background-color: #667eea;
       color: white;
@@ -70,38 +70,38 @@
       cursor: pointer;
       transition: background-color 0.3s;
     }
-    
+
     .auth-form button:hover {
       background-color: #5a67d8;
     }
-    
+
     .toggle-mode {
       text-align: center;
       font-size: 0.9rem;
       margin-top: 10px;
     }
-    
+
     .toggle-mode span {
       color: #667eea;
       cursor: pointer;
       text-decoration: underline;
     }
-    
+
     .g_id_signin {
       margin-top: 20px;
       display: flex;
       justify-content: center;
     }
-    
+
     @media screen and (max-width: 500px) {
       .auth-container {
         padding: 1.5rem;
       }
-      
+
       h2 {
         font-size: 1.5rem;
       }
-      
+
       .auth-form input,
       .auth-form select,
       .auth-form button {
@@ -130,23 +130,23 @@
       <button type="submit" id="auth-button">Continue</button>
       <p class="toggle-mode"><span id="toggle-link">Don't have an account? Sign up</span></p>
     </form>
-    
+
     <hr />
     <div class="g_id_signin" id="gSignInDiv"></div>
   </div>
-  
+
   <script>
     const supabase = window.supabase.createClient(
       'https://wqxlakambzrebifqszbo.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxeGxha2FtYnpyZWJpZnFzemJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxOTAzMjcsImV4cCI6MjA1OTc2NjMyN30.kIEpEt84s5sRAPmaN7Vb2oQCnXIHnKVxPFXD5gDqNuQ'
+      'your-supabase-api-key-here'
     );
-    
+
     let mode = "login";
     const form = document.getElementById("auth-form");
     const extraFields = document.getElementById("extra-fields");
     const toggleLink = document.getElementById("toggle-link");
     const formTitle = document.getElementById("form-title");
-    
+
     toggleLink.onclick = async () => {
       if (mode === "login") {
         mode = "signup";
@@ -160,14 +160,14 @@
         toggleLink.textContent = "Don't have an account? Sign up";
       }
     };
-    
+
     form.onsubmit = async (e) => {
       e.preventDefault();
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
       const fullname = document.getElementById("fullname").value;
       const role = document.getElementById("role").value;
-      
+
       if (mode === "login") {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
@@ -177,27 +177,30 @@
           window.location.href = "/asliproject/dashboard.html";
         }
       } else {
+        // Check if the user already exists
         const { data: exists } = await supabase
           .from("users")
           .select("email")
           .eq("email", email);
-        
+
         if (exists && exists.length > 0) {
           alert("This email is already registered. Please log in.");
           return;
         }
-        
+
         if (!fullname || !role) {
           alert("Please fill full name and role");
           return;
         }
-        
+
+        // Register user
         const { data: signupData, error: signupError } = await supabase.auth.signUp({ email, password });
         if (signupError) {
           alert("Signup failed: " + signupError.message);
           return;
         }
-        
+
+        // Insert user into the 'users' table
         const { error: insertError } = await supabase.from("users").insert([{ email, fullname, role }]);
         if (insertError) {
           alert("User data insert failed: " + insertError.message);
@@ -207,38 +210,40 @@
         }
       }
     };
-    
-    window.onload = function() {
+
+    window.onload = function () {
       google.accounts.id.initialize({
-        client_id: "1047818163471-vdijksv0ta6f0u1msu2e8gvd792097fi.apps.googleusercontent.com",
+        client_id: "your-google-client-id",
         callback: async (response) => {
           const { data, error } = await supabase.auth.signInWithIdToken({
             provider: "google",
             token: response.credential,
           });
-          
+
           if (error) {
             alert("Google login failed: " + error.message);
           } else {
             const userEmail = data.user.email;
             const userMeta = data.user.user_metadata;
             const full_name = userMeta.full_name || userMeta.name || "";
-            
+
+            // Check if the user exists
             const { data: userExists } = await supabase
               .from("users")
               .select("*")
               .eq("email", userEmail);
-            
+
             if (!userExists || userExists.length === 0) {
+              // Insert new user if they do not exist
               await supabase.from("users").insert([{ email: userEmail, fullname: full_name, role: "user" }]);
             }
-            
+
             sessionStorage.setItem("user", JSON.stringify(data));
             window.location.href = "/asliproject/dashboard.html";
           }
         },
       });
-      
+
       google.accounts.id.renderButton(document.getElementById("gSignInDiv"), {
         theme: "outline",
         size: "large",
