@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kyro Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -18,11 +18,6 @@
       padding: 1rem 2rem;
       background: white;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    header h1 {
-      margin: 0;
-      font-size: 1.8rem;
-      color: #0d3b66;
     }
     .menu-toggle {
       display: none;
@@ -105,9 +100,6 @@
     button:hover {
       background-color: #155fa0;
     }
-    .edit-btn {
-      margin-top: 20px;
-    }
     .notification {
       position: fixed;
       top: 50%;
@@ -123,12 +115,8 @@
       text-align: center;
     }
     @media (max-width: 600px) {
-      .menu {
-        display: none;
-      }
-      .menu-toggle {
-        display: flex;
-      }
+      .menu { display: none; }
+      .menu-toggle { display: flex; }
     }
   </style>
 </head>
@@ -136,31 +124,19 @@
   <header>
     <h1>Kyro AI</h1>
     <div class="menu-toggle" onclick="toggleCurtain()">
-      <div></div>
-      <div></div>
-      <div></div>
+      <div></div><div></div><div></div>
     </div>
   </header>
 
   <nav class="menu">
     <a href="#" onclick="showSection('profile')">Profile</a>
-    <a href="#" onclick="showSection('updatePassword')">Settings</a>
-    <a href="#">Raise a Ticket</a>
-    <a href="#">FAQ</a>
-    <a href="#">Privacy Policy</a>
-    <a href="#">About</a>
-    <a href="#">Documentation</a>
+    <a href="#" onclick="showSection('settings')">Settings</a>
     <a href="#" onclick="logout()">Logout</a>
   </nav>
 
   <nav class="curtain" id="curtainMenu">
     <a href="#" onclick="showSection('profile'); toggleCurtain();">Profile</a>
-    <a href="#" onclick="showSection('updatePassword'); toggleCurtain();">Settings</a>
-    <a href="#">Raise a Ticket</a>
-    <a href="#">FAQ</a>
-    <a href="#">Privacy Policy</a>
-    <a href="#">About</a>
-    <a href="#">Documentation</a>
+    <a href="#" onclick="showSection('settings'); toggleCurtain();">Settings</a>
     <a href="#" onclick="logout()">Logout</a>
   </nav>
 
@@ -169,35 +145,25 @@
     <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
       <img id="userPic" src="" alt="Profile Picture" style="width:100px; height:100px; object-fit:cover; border-radius: 50%; border: 3px solid #0d3b66;" />
     </div>
-    <div style="text-align:left"><strong>Name:</strong></div>
-    <div id="fullName" style="margin-bottom: 0.8rem; text-align:left"></div>
-    <div style="text-align:left"><strong>Email:</strong></div>
-    <div id="email" style="margin-bottom: 0.8rem; text-align:left"></div>
-    <div style="text-align:left"><strong>Role:</strong></div>
-    <div id="role" style="margin-bottom: 0.8rem; text-align:left"></div>
-    <div style="text-align:left">
-      <button class="edit-btn" onclick="toggleEdit(true)">Edit</button>
-    </div>
-    <div id="editForm" style="display:none; margin-top: 1rem;">
-      <input type="text" id="editName" placeholder="Enter new name">
-      <input type="file" id="editPic" accept="image/*">
-      <div style="display: flex; justify-content: space-between;">
-        <button onclick="saveName()">Save</button>
-        <button onclick="toggleEdit(false)">Cancel</button>
-      </div>
-    </div>
+    <div><strong>Name:</strong> <span id="fullName"></span></div>
+    <div><strong>Email:</strong> <span id="email"></span></div>
+    <div><strong>Role:</strong> <span id="role"></span></div>
   </div>
 
-  <div id="updatePassword" class="section">
-    <h3>Request Password Reset</h3>
-    <p>This will send a password reset link to your registered email.</p>
+  <div id="settings" class="section">
+    <h3>Update Info</h3>
+    <input type="text" id="editName" placeholder="Enter new name">
+    <input type="file" id="editPic" accept="image/*">
+    <button onclick="saveUpdates()">Save Changes</button>
+    <hr style="margin: 20px 0">
+    <h4>Reset Password</h4>
     <button onclick="requestPasswordReset()">Send Reset Link</button>
   </div>
 
   <div id="notification" class="notification"></div>
 
   <script>
-    const supabase = window.supabase.createClient('https://wqxlakambzrebifqszbo.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxeGxha2FtYnpyZWJpZnFzemJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTc1MTczODIsImV4cCI6MjAxMzA5MzM4Mn0.8yQOMvZgGsy2RbIKtfbA2dZo1F8L2Tpt_6l3pqOTsnI');
+    const supabase = window.supabase.createClient('https://wqxlakambzrebifqszbo.supabase.co', 'YOUR_PUBLIC_ANON_KEY');
 
     const session = JSON.parse(sessionStorage.getItem('user'));
     const email = session?.user?.email;
@@ -214,30 +180,30 @@
       document.title = `Kyro Dashboard - Welcome ${data.fullname}`;
     }
 
-    function toggleEdit(show) {
-      document.getElementById('editForm').style.display = show ? 'block' : 'none';
-    }
-
-    async function saveName() {
+    async function saveUpdates() {
       const newName = document.getElementById('editName').value;
+      const file = document.getElementById('editPic').files[0];
+
+      if (file) {
+        const { data: uploaded, error: uploadError } = await supabase.storage.from('profile-pics').upload(`${email}.jpg`, file, { upsert: true });
+        if (uploadError) return showNotification('Upload failed');
+      }
+
       await supabase.from('users').update({ fullname: newName }).eq('email', email);
-      showNotification('Your data is saved');
-      toggleEdit(false);
+      showNotification('Changes saved');
       fetchUserData();
     }
 
     async function requestPasswordReset() {
       const { error } = await supabase.auth.resetPasswordForEmail(email);
-      if (!error) showNotification('Password reset link sent to your email');
+      if (!error) showNotification('Password reset link sent');
     }
 
     function showNotification(message) {
       const note = document.getElementById('notification');
       note.textContent = message;
       note.style.display = 'block';
-      setTimeout(() => {
-        note.style.display = 'none';
-      }, 3000);
+      setTimeout(() => note.style.display = 'none', 3000);
     }
 
     function showSection(id) {
