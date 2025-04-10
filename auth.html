@@ -1,184 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PulseProfit - Sign In / Sign Up</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f2f2f2;
-        }
-        .container {
-            max-width: 400px;
-            margin: 50px auto;
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h2 {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        input[type="email"],
-        input[type="password"],
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #007BFF;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .google-btn {
-            background-color: #db4437;
-        }
-        .google-btn:hover {
-            background-color: #c23321;
-        }
-        .separator {
-            text-align: center;
-            margin: 15px 0;
-        }
-        .separator hr {
-            margin: 10px 0;
-        }
-        .footer-text {
-            text-align: center;
-            font-size: 14px;
-            margin-top: 15px;
-        }
-        .footer-text a {
-            color: #007BFF;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        .footer-text a:hover {
-            text-decoration: underline;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kyro.AI</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    
+    .auth-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    
+    .auth-form input,
+    .auth-form select,
+    .auth-form button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+    }
+    
+    .g_id_signin {
+      margin-top: 20px;
+    }
+  </style>
 </head>
+
 <body>
-    <div class="container" id="signin-form">
-        <h2>Sign In</h2>
-        <button class="google-btn" onclick="handleGoogleSignIn()">Sign in with Google</button>
-        <div class="separator">
-            <hr>
-            <span>or</span>
-            <hr>
-        </div>
-        <input type="email" id="signin-email" placeholder="Email">
-        <input type="password" id="signin-password" placeholder="Password">
-        <button onclick="handleSignIn()">Sign In</button>
-        <div class="footer-text">
-            <p>Don't have an account? <a onclick="toggleForm('signup')">Sign Up</a></p>
-            <p><a onclick="handleForgotPassword()">Forgot password?</a></p>
-        </div>
-    </div>
-
-    <div class="container" id="signup-form" style="display: none;">
-        <h2>Sign Up</h2>
-        <button class="google-btn" onclick="handleGoogleSignIn()">Sign up with Google</button>
-        <div class="separator">
-            <hr>
-            <span>or</span>
-            <hr>
-        </div>
-        <input type="text" id="signup-name" placeholder="Full Name">
-        <input type="email" id="signup-email" placeholder="Email">
-        <input type="password" id="signup-password" placeholder="Password">
-        <button onclick="handleSignUp()">Sign Up</button>
-        <div class="footer-text">
-            <p>Already have an account? <a onclick="toggleForm('signin')">Sign In</a></p>
-        </div>
-    </div>
-
-    <div class="container" id="forgot-password-form" style="display: none;">
-        <h2>Reset Password</h2>
-        <input type="email" id="forgot-password-email" placeholder="Enter your email">
-        <button onclick="handleResetPassword()">Send Reset Link</button>
-        <div class="footer-text">
-            <p><a onclick="toggleForm('signin')">Back to Sign In</a></p>
-        </div>
-    </div>
-
-    <script src="https://unpkg.com/@supabase/supabase-js"></script>
-    <script>
-        const supabaseUrl = 'https://lqwdcdwqzaxlhtemvymk.supabase.co';
-        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxxd2RjZHd6YXhsaHRlbXZ5bWsiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTcxMjc1MjA1NCwiZXhwIjoxNzQ0MzA5NjU0fQ.B6yKz9IbgMn-bLaeAJ7rx0eUnFHTMOlKEMSp6AZieMs';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
-
-        function toggleForm(formType) {
-            document.getElementById('signin-form').style.display = 'none';
-            document.getElementById('signup-form').style.display = 'none';
-            document.getElementById('forgot-password-form').style.display = 'none';
-
-            if (formType === 'signin') document.getElementById('signin-form').style.display = 'block';
-            if (formType === 'signup') document.getElementById('signup-form').style.display = 'block';
-            if (formType === 'forgot') document.getElementById('forgot-password-form').style.display = 'block';
+  <h2>Kyro Auth</h2>
+  <div class="auth-container">
+    <form id="auth-form" class="auth-form">
+      <h3 id="form-title">Sign In</h3>
+      <input id="email" type="email" placeholder="Email" required />
+      <input id="password" type="password" placeholder="Password" required />
+      <div id="extra-fields" style="display:none;">
+        <input id="fullname" type="text" placeholder="Full Name" />
+        <select id="role">
+          <option value="">Select Role</option>
+          <option value="admin">Admin</option>
+          <option value="user">User</option>
+        </select>
+      </div>
+      <button type="submit" id="auth-button">Continue</button>
+      <p class="toggle-mode"><span id="toggle-link">Don't have an account? Sign up</span></p>
+    </form>
+    
+    <hr />
+    <div class="g_id_signin" id="gSignInDiv"></div>
+  </div>
+  
+  <script>
+    const supabase = window.supabase.createClient(
+      'https://wqxlakambzrebifqszbo.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxeGxha2FtYnpyZWJpZnFzemJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxOTAzMjcsImV4cCI6MjA1OTc2NjMyN30.kIEpEt84s5sRAPmaN7Vb2oQCnXIHnKVxPFXD5gDqNuQ'
+    );
+    
+    let mode = "login";
+    const form = document.getElementById("auth-form");
+    const extraFields = document.getElementById("extra-fields");
+    const toggleLink = document.getElementById("toggle-link");
+    const formTitle = document.getElementById("form-title");
+    
+    toggleLink.onclick = () => {
+      mode = mode === "login" ? "signup" : "login";
+      formTitle.textContent = mode === "login" ? "Sign In" : "Sign Up";
+      extraFields.style.display = mode === "signup" ? "block" : "none";
+      toggleLink.textContent = mode === "login" ?
+        "Don't have an account? Sign up" :
+        "Already have an account? Login";
+    };
+    
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const fullname = document.getElementById("fullname").value;
+      const role = document.getElementById("role").value;
+      
+      if (mode === "login") {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          alert("Login failed: " + error.message);
+        } else {
+          sessionStorage.setItem("user", JSON.stringify(data));
+          window.location.href = "/dashboard.html";
         }
-
-        async function handleSignIn() {
-            const email = document.getElementById('signin-email').value;
-            const password = document.getElementById('signin-password').value;
-            const { error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) alert(error.message);
-            else alert('Signed in successfully!');
+      } else {
+        if (!fullname || !role) {
+          alert("Please fill full name and role");
+          return;
         }
-
-        async function handleSignUp() {
-            const name = document.getElementById('signup-name').value;
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-
-            const { data: existingUser, error: checkError } = await supabase.from('users').select('*').eq('email', email);
-            if (existingUser.length > 0) {
-                alert('Account already exists. Please sign in.');
-                toggleForm('signin');
-                return;
+        
+        const { data: signupData, error: signupError } = await supabase.auth.signUp({ email, password });
+        if (signupError) {
+          alert("Signup failed: " + signupError.message);
+          return;
+        }
+        
+        const { error: insertError } = await supabase.from("users").insert([{ email, fullname, role }]);
+        if (insertError) {
+          alert("User data insert failed: " + insertError.message);
+        } else {
+          sessionStorage.setItem("user", JSON.stringify(signupData));
+          window.location.href = "/dashboard.html";
+        }
+      }
+    };
+    
+    // Google Login
+    window.onload = function() {
+      google.accounts.id.initialize({
+        client_id: "1047818163471-vdijksv0ta6f0u1msu2e8gvd792097fi.apps.googleusercontent.com",
+        callback: async (response) => {
+          const { data, error } = await supabase.auth.signInWithIdToken({
+            provider: "google",
+            token: response.credential,
+          });
+          
+          if (error) {
+            alert("Google login failed: " + error.message);
+          } else {
+            console.log("Google Login Success", data);
+            const userEmail = data.user.email;
+            const { data: userExists } = await supabase
+              .from("users")
+              .select("*")
+              .eq("email", userEmail);
+            
+            if (!userExists || userExists.length === 0) {
+              await supabase.from("users").insert([{ email: userEmail, fullname: data.user.user_metadata.full_name || "", role: "user" }]);
             }
-
-            const { error } = await supabase.auth.signUp({
-                email,
-                password,
-                options: { data: { name } }
-            });
-            if (error) alert(error.message);
-            else alert('Signup successful! Check your email.');
-        }
-
-        async function handleGoogleSignIn() {
-            const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
-            if (error) alert(error.message);
-        }
-
-        async function handleResetPassword() {
-            const email = document.getElementById('forgot-password-email').value;
-            const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: 'https://pulseprofit.netlify.app/dashboard?param=update-password'
-            });
-            if (error) alert(error.message);
-            else alert('Reset link sent! Check your email.');
-        }
-
-        function handleForgotPassword() {
-            toggleForm('forgot');
-        }
-    </script>
+            
+            sessionStorage.setItem("user", JSON.stringify(data));
+            window.location.href = "/dashboard.html";
+          }
+        },
+      });
+      
+      google.accounts.id.renderButton(document.getElementById("gSignInDiv"), {
+        theme: "outline",
+        size: "large",
+      });
+    };
+  </script>
 </body>
+
 </html>
