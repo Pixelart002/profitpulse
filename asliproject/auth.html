@@ -1,272 +1,162 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kyro.AI Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kyro AI Auth</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    
+    .auth-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    
+    .auth-form input,
+    .auth-form select,
+    .auth-form button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+    }
+    
+    .g_id_signin {
+      margin-top: 20px;
+    }
+  </style>
 </head>
-<body class="bg-gray-100">
-    <!-- Header -->
-    <header class="bg-white shadow-sm">
-        <div class="flex justify-between items-center px-6 py-4">
-            <h1 class="text-2xl font-bold text-purple-600">Kyro.AI</h1>
-            <div class="flex items-center space-x-4">
-                <div id="remainingCredits" class="text-purple-600 font-semibold"></div>
-                <button id="menuBtn" class="p-2 hover:bg-gray-100 rounded-lg">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </header>
 
-    <!-- Curtain Menu -->
-    <div id="curtainMenu" class="fixed inset-y-0 right-0 w-64 bg-white shadow-xl transform translate-x-full transition-transform duration-300">
-        <div class="p-4">
-            <div class="mb-4">
-                <h3 class="text-lg font-semibold">Menu</h3>
-            </div>
-            <nav class="space-y-2">
-                <a href="#" class="block p-2 hover:bg-gray-100 rounded" onclick="showProfile()">Profile</a>
-                <a href="#" class="block p-2 hover:bg-gray-100 rounded" onclick="showSettings()">Settings</a>
-                <a href="#" class="block p-2 hover:bg-gray-100 rounded" onclick="showCredits()">Credits</a>
-                <a href="#" class="block p-2 hover:bg-gray-100 rounded" onclick="showTicketModal()">Raise a Ticket</a>
-                <a href="#" class="block p-2 hover:bg-gray-100 rounded">Documentation</a>
-                <a href="#" class="block p-2 hover:bg-gray-100 rounded">Privacy Policy</a>
-                <button onclick="logout()" class="w-full mt-4 bg-red-500 text-white p-2 rounded hover:bg-red-600">Logout</button>
-            </nav>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <main class="p-6" id="mainContent">
-        <!-- Profile Section -->
-        <div id="profileSection" class="bg-white rounded-lg shadow p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4">User Profile</h2>
-            <div id="profileContent"></div>
-        </div>
-
-        <!-- Credits Section -->
-        <div id="creditsSection" class="hidden bg-white rounded-lg shadow p-6 mb-6">
-            <h2 class="text-xl font-semibold mb-4">Credits</h2>
-            <ul class="space-y-2">
-                <li><strong>Total Credits Earned:</strong> <span id="totalCredits"></span></li>
-                <li><strong>Earned by Tasks:</strong> <span id="taskCredits"></span></li>
-                <li><strong>Earned by Social:</strong> <span id="socialCredits"></span></li>
-                <li><strong>Purchased Credits:</strong> <span id="purchasedCredits"></span></li>
-                <li><strong>Remaining Credits:</strong> <span id="remainingCreditsDetail"></span></li>
-            </ul>
-        </div>
-
-        <!-- Admin Dashboard (Conditional) -->
-        <div id="adminDashboard" class="hidden">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div class="bg-white p-6 rounded-lg shadow">
-                    <h3 class="font-semibold mb-2">Total Users</h3>
-                    <p id="totalUsers" class="text-3xl text-purple-600">0</p>
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow">
-                    <h3 class="font-semibold mb-2">API Calls (Last Hour)</h3>
-                    <p id="apiCalls" class="text-3xl text-purple-600">0</p>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex justify-between mb-4">
-                    <h3 class="text-xl font-semibold">User Management</h3>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="text-left border-b">
-                                <th class="pb-2">Email</th>
-                                <th class="pb-2">Role</th>
-                                <th class="pb-2">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="usersTable"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Modals -->
-    <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden">
-        <div class="bg-white rounded-lg p-6 max-w-md mx-auto mt-20">
-            <h3 class="text-xl font-semibold mb-4">Settings</h3>
-            <form id="updateProfileForm">
-                <input type="text" id="fullName" class="w-full p-2 mb-4 border rounded" placeholder="Full Name">
-                <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">Update Profile</button>
-            </form>
-            <button onclick="showUpdatePassword()" class="mt-4 text-purple-600 hover:underline">Change Password</button>
-        </div>
-    </div>
-
-    <div id="ticketModal" class="fixed inset-0 bg-black bg-opacity-50 hidden">
-        <div class="bg-white rounded-lg p-6 max-w-md mx-auto mt-20">
-            <h3 class="text-xl font-semibold mb-4">Raise a Ticket</h3>
-            <form id="ticketForm">
-                <textarea class="w-full p-2 mb-4 border rounded" placeholder="Describe your issue" rows="4"></textarea>
-                <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">Submit Ticket</button>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        const supabase = createClient('https://wqxlakambzrebifqszbo.supabase.co', ' eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxeGxha2FtYnpyZWJpZnFzemJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxOTAzMjcsImV4cCI6MjA1OTc2NjMyN30.kIEpEt84s5sRAPmaN7Vb2oQCnXIHnKVxPFXD5gDqNuQ');
-        let currentUser = null;
-
-        async function initDashboard() {
-            currentUser = JSON.parse(sessionStorage.getItem('user'));
-            if (!currentUser) window.location.href = '/login';
-            await loadProfile();
-            await loadCredits();
-            checkAdminAccess();
-            setupRealTime();
-            loadAnalytics();
+<body>
+  <h2>Kyro Auth</h2>
+  <div class="auth-container">
+    <form id="auth-form" class="auth-form">
+      <h3 id="form-title">Sign In</h3>
+      <input id="email" type="email" placeholder="Email" required />
+      <input id="password" type="password" placeholder="Password" required />
+      <div id="extra-fields" style="display:none;">
+        <input id="fullname" type="text" placeholder="Full Name" />
+        <select id="role">
+          <option value="">Select Role</option>
+          <option value="admin">Admin</option>
+          <option value="user">User</option>
+        </select>
+      </div>
+      <button type="submit" id="auth-button">Continue</button>
+      <p class="toggle-mode"><span id="toggle-link">Don't have an account? Sign up</span></p>
+    </form>
+    
+    <hr />
+    <div class="g_id_signin" id="gSignInDiv"></div>
+  </div>
+  
+  <script>
+    const supabase = window.supabase.createClient(
+      'https://wqxlakambzrebifqszbo.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxeGxha2FtYnpyZWJpZnFzemJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxOTAzMjcsImV4cCI6MjA1OTc2NjMyN30.kIEpEt84s5sRAPmaN7Vb2oQCnXIHnKVxPFXD5gDqNuQ'
+    );
+    
+    let mode = "login";
+    const form = document.getElementById("auth-form");
+    const extraFields = document.getElementById("extra-fields");
+    const toggleLink = document.getElementById("toggle-link");
+    const formTitle = document.getElementById("form-title");
+    
+    toggleLink.onclick = () => {
+      mode = mode === "login" ? "signup" : "login";
+      formTitle.textContent = mode === "login" ? "Sign In" : "Sign Up";
+      extraFields.style.display = mode === "signup" ? "block" : "none";
+      toggleLink.textContent = mode === "login" ?
+        "Don't have an account? Sign up" :
+        "Already have an account? Login";
+    };
+    
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const fullname = document.getElementById("fullname").value;
+      const role = document.getElementById("role").value;
+      
+      if (mode === "login") {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          alert("Login failed: " + error.message);
+        } else {
+          sessionStorage.setItem("user", JSON.stringify(data));
+          window.location.href = "/asliproject/dashboard.html";
         }
-
-        async function loadProfile() {
-            const { data } = await supabase.from('users').select('*').eq('email', currentUser.email).single();
-            if (data) {
-                document.getElementById('profileContent').innerHTML = `
-                    <p><strong>Email:</strong> ${data.email}</p>
-                    <p><strong>Name:</strong> ${data.fullname}</p>
-                    <p><strong>Role:</strong> ${data.role}</p>
-                `;
+      } else {
+        if (!fullname || !role) {
+          alert("Please fill full name and role");
+          return;
+        }
+        
+        const { data: signupData, error: signupError } = await supabase.auth.signUp({ email, password });
+        if (signupError) {
+          alert("Signup failed: " + signupError.message);
+          return;
+        }
+        
+        const { error: insertError } = await supabase.from("users").insert([{ email, fullname, role }]);
+        if (insertError) {
+          alert("User data insert failed: " + insertError.message);
+        } else {
+          sessionStorage.setItem("user", JSON.stringify(signupData));
+          window.location.href = "/asliproject/dashboard.html";
+        }
+      }
+    };
+    
+    // Google Login
+    window.onload = function() {
+      google.accounts.id.initialize({
+        client_id: "1047818163471-vdijksv0ta6f0u1msu2e8gvd792097fi.apps.googleusercontent.com",
+        callback: async (response) => {
+          const { data, error } = await supabase.auth.signInWithIdToken({
+            provider: "google",
+            token: response.credential,
+          });
+          
+          if (error) {
+            alert("Google login failed: " + error.message);
+          } else {
+            console.log("Google Login Success", data);
+            const userEmail = data.user.email;
+            const { data: userExists } = await supabase
+              .from("users")
+              .select("*")
+              .eq("email", userEmail);
+            
+            if (!userExists || userExists.length === 0) {
+              await supabase.from("users").insert([{ email: userEmail, fullname: data.user.user_metadata.full_name || "", role: "user" }]);
             }
-        }
-
-        async function loadCredits() {
-            const { data } = await supabase.from('credits').select('*').eq('email', currentUser.email).single();
-            if (data) {
-                document.getElementById('remainingCredits').textContent = `${data.remaining} Credits`;
-                document.getElementById('totalCredits').textContent = data.total;
-                document.getElementById('taskCredits').textContent = data.task_credits;
-                document.getElementById('socialCredits').textContent = data.social_credits;
-                document.getElementById('purchasedCredits').textContent = data.purchased_credits;
-                document.getElementById('remainingCreditsDetail').textContent = data.remaining;
-            }
-        }
-
-        function showCredits() {
-            document.getElementById('creditsSection').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        async function checkAdminAccess() {
-            const { data } = await supabase.from('users').select('role').eq('email', currentUser.email).single();
-            if (data.role === 'admin') {
-                document.getElementById('adminDashboard').classList.remove('hidden');
-                loadUsers();
-            }
-        }
-
-        async function loadUsers() {
-            const { data } = await supabase.from('users').select('*');
-            const tbody = document.getElementById('usersTable');
-            tbody.innerHTML = data.map(user => `
-                <tr class="border-b">
-                    <td class="py-2">${user.email}</td>
-                    <td>${user.role}</td>
-                    <td><button onclick="deleteUser('${user.id}')" class="text-red-500 hover:text-red-700">Delete</button></td>
-                </tr>`).join('');
-            document.getElementById('totalUsers').textContent = data.length;
-        }
-
-        async function loadAnalytics() {
-            const { data } = await supabase.rpc('count_api_calls_last_hour');
-            document.getElementById('apiCalls').textContent = data;
-        }
-
-        function setupRealTime() {
-            supabase.channel('custom-all-channel')
-                .on('postgres_changes', { event: '*', schema: 'public' }, () => {
-                    loadUsers();
-                    loadAnalytics();
-                    loadCredits();
-                })
-                .subscribe();
-        }
-
-        function showProfile() {
-            document.getElementById('profileSection').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function showSettings() {
-            document.getElementById('settingsModal').classList.remove('hidden');
-            document.getElementById('fullName').value = currentUser.fullname || '';
-        }
-
-        document.getElementById('updateProfileForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const fullName = document.getElementById('fullName').value.trim();
-            const { error } = await supabase.from('users').update({ fullname: fullName }).eq('email', currentUser.email);
-            if (!error) {
-                alert('Your data is saved');
-                document.getElementById('settingsModal').classList.add('hidden');
-                loadProfile();
-            } else {
-                alert('Failed to update profile');
-            }
-        });
-
-        function showUpdatePassword() {
-            const email = currentUser.email;
-            supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: window.location.origin + '/auth.html'
-            }).then(() => {
-                alert('Password reset link sent to your email.');
-                document.getElementById('settingsModal').classList.add('hidden');
-            }).catch(err => {
-                alert('Error sending password reset: ' + err.message);
-            });
-        }
-
-        function showTicketModal() {
-            document.getElementById('ticketModal').classList.remove('hidden');
-        }
-
-        document.getElementById('ticketForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const message = e.target.querySelector('textarea').value.trim();
-            const { error } = await supabase.from('tickets').insert([{ email: currentUser.email, message }]);
-            if (!error) {
-                alert('Ticket submitted!');
-                document.getElementById('ticketModal').classList.add('hidden');
-                e.target.reset();
-            } else {
-                alert('Failed to submit ticket');
-            }
-        });
-
-        document.getElementById('menuBtn').addEventListener('click', () => {
-            document.getElementById('curtainMenu').classList.toggle('translate-x-full');
-        });
-
-        async function logout() {
-            await supabase.auth.signOut();
-            sessionStorage.removeItem('user');
-            window.location.href = '/login';
-        }
-
-        async function deleteUser(userId) {
-            if (confirm('Are you sure?')) {
-                await supabase.from('users').delete().eq('id', userId);
-                loadUsers();
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', initDashboard);
-
-        document.addEventListener('click', function(e) {
-            if (e.target.id === 'settingsModal' || e.target.id === 'ticketModal') {
-                e.target.classList.add('hidden');
-            }
-        });
-    </script>
+            
+            sessionStorage.setItem("user", JSON.stringify(data));
+            window.location.href = "/asliproject/dashboard.html";
+          }
+        },
+      });
+      
+      google.accounts.id.renderButton(document.getElementById("gSignInDiv"), {
+        theme: "outline",
+        size: "large",
+      });
+    };
+  </script>
 </body>
+
 </html>
