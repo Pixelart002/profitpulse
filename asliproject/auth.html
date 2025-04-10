@@ -1,269 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kyro AI Auth</title>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to right, #667eea, #764ba2);
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-    }
-    
-    h2 {
-      color: white;
-      margin: 1rem;
-      text-align: center;
-    }
-    
-    .auth-container {
-      background: white;
-      padding: 2rem;
-      border-radius: 15px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-      width: 90%;
-      max-width: 400px;
-      animation: fadeIn 0.5s ease-in-out;
-    }
-    
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    .auth-form input,
-    .auth-form select,
-    .auth-form button {
-      width: 100%;
-      margin: 10px 0;
-      padding: 12px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-    }
-    
-    .auth-form button {
-      background-color: #667eea;
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    
-    .auth-form button:hover {
-      background-color: #5a67d8;
-    }
-    
-    .toggle-mode {
-      text-align: center;
-      font-size: 0.9rem;
-      margin-top: 10px;
-    }
-    
-    .toggle-mode span {
-      color: #667eea;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-    
-    .g_id_signin {
-      margin-top: 20px;
-      display: flex;
-      justify-content: center;
-    }
-    
-    @media screen and (max-width: 500px) {
-      .auth-container {
-        padding: 1.5rem;
-      }
-      
-      h2 {
-        font-size: 1.5rem;
-      }
-      
-      .auth-form input,
-      .auth-form select,
-      .auth-form button {
-        font-size: 0.95rem;
-        padding: 10px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kyro.AI Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="flex justify-between items-center px-6 py-4">
+            <h1 class="text-2xl font-bold text-purple-600">Kyro.AI</h1>
+            <button id="menuBtn" class="p-2 hover:bg-gray-100 rounded-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+        </div>
+    </header>
 
-<body>
-  <h2>Welcome to Kyro Auth</h2>
-  <div class="auth-container">
-    <form id="auth-form" class="auth-form">
-      <h3 id="form-title">Sign In</h3>
-      <input id="email" type="email" placeholder="Email" required />
-      <input id="password" type="password" placeholder="Password" required />
-      <div id="extra-fields" style="display:none;">
-        <input id="fullname" type="text" placeholder="Full Name" required />
-        <select id="role" required>
-          <option value="">Select Role</option>
-          <option value="admin">Admin</option>
-          <option value="user">User</option>
-        </select>
-      </div>
-      <button type="submit" id="auth-button">Continue</button>
-      <p class="toggle-mode"><span id="toggle-link">Don't have an account? Sign up</span></p>
-    </form>
-    
-    <hr />
-    <div class="g_id_signin" id="gSignInDiv"></div>
-  </div>
-  
-  <script>
-    const supabase = window.supabase.createClient(
-      'https://wqxlakambzrebifqszbo.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxeGxha2FtYnpyZWJpZnFzemJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxOTAzMjcsImV4cCI6MjA1OTc2NjMyN30.kIEpEt84s5sRAPmaN7Vb2oQCnXIHnKVxPFXD5gDqNuQ' // Replace with your actual Supabase API key
-    );
-    
-    let mode = "login";
-    const form = document.getElementById("auth-form");
-    const extraFields = document.getElementById("extra-fields");
-    const toggleLink = document.getElementById("toggle-link");
-    const formTitle = document.getElementById("form-title");
-    
-    toggleLink.onclick = async () => {
-      if (mode === "login") {
-        mode = "signup";
-        formTitle.textContent = "Sign Up";
-        extraFields.style.display = "block";
-        toggleLink.textContent = "Already have an account? Login";
-      } else {
-        mode = "login";
-        formTitle.textContent = "Sign In";
-        extraFields.style.display = "none";
-        toggleLink.textContent = "Don't have an account? Sign up";
-      }
-    };
-    
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const fullname = document.getElementById("fullname").value;
-      const role = document.getElementById("role").value;
-      
-      if (mode === "login") {
-        // Login process
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          alert("Login failed: " + error.message);
-        } else {
-          sessionStorage.setItem("user", JSON.stringify(data));
-          window.location.href = "/asliproject/dashboard.html";
-        }
-      } else {
-        // Signup process
-        // Check if the user already exists
-        const { data: exists, error: checkError } = await supabase
-          .from("users")
-          .select("email")
-          .eq("email", email);
-        
-        if (checkError) {
-          alert("Error checking user existence: " + checkError.message);
-          return;
-        }
-        
-        if (exists && exists.length > 0) {
-          alert("This email is already registered. Please log in.");
-          return; // Prevent signup if the user already exists
-        }
-        
-        if (!fullname || !role) {
-          alert("Please fill full name and role");
-          return;
-        }
-        
-        // Register user
-        const { data: signupData, error: signupError } = await supabase.auth.signUp({ email, password });
-        if (signupError) {
-          alert("Signup failed: " + signupError.message);
-          return;
-        }
-        
-        // Insert user into the 'users' table
-        const { error: insertError } = await supabase.from("users").insert([{ email, fullname, role }]);
-        if (insertError) {
-          alert("User data insert failed: " + insertError.message);
-        } else {
-          sessionStorage.setItem("user", JSON.stringify(signupData));
-          window.location.href = "/asliproject/dashboard.html";
-        }
-      }
-    };
-    
-    window.onload = function() {
-      google.accounts.id.initialize({
-        client_id: "1047818163471-vdijksv0ta6f0u1msu2e8gvd792097fi.apps.googleusercontent.com", // Replace with your actual Google client ID
-        callback: async (response) => {
-          const { data, error } = await supabase.auth.signInWithIdToken({
-            provider: "google",
-            token: response.credential,
-          });
-          
-          if (error) {
-            alert("Google login failed: " + error.message);
-          } else {
-            const userEmail = data.user.email;
-            const userMeta = data.user.user_metadata;
-            const full_name = userMeta.full_name || userMeta.name || "";
+    <!-- Curtain Menu -->
+    <div id="curtainMenu" class="fixed inset-y-0 right-0 w-64 bg-white shadow-xl transform translate-x-full transition-transform duration-300">
+        <div class="p-4">
+            <div class="mb-4">
+                <h3 class="text-lg font-semibold">Menu</h3>
+            </div>
+            <nav class="space-y-2">
+                <a href="#" class="block p-2 hover:bg-gray-100 rounded" onclick="showProfile()">Profile</a>
+                <a href="#" class="block p-2 hover:bg-gray-100 rounded" onclick="showSettings()">Settings</a>
+                <a href="#" class="block p-2 hover:bg-gray-100 rounded" onclick="showTicketModal()">Raise a Ticket</a>
+                <a href="#" class="block p-2 hover:bg-gray-100 rounded">Documentation</a>
+                <a href="#" class="block p-2 hover:bg-gray-100 rounded">Privacy Policy</a>
+                <button onclick="logout()" class="w-full mt-4 bg-red-500 text-white p-2 rounded hover:bg-red-600">Logout</button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="p-6" id="mainContent">
+        <!-- Profile Section -->
+        <div id="profileSection" class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">User Profile</h2>
+            <div id="profileContent"></div>
+        </div>
+
+        <!-- Admin Dashboard (Conditional) -->
+        <div id="adminDashboard" class="hidden">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="font-semibold mb-2">Total Users</h3>
+                    <p id="totalUsers" class="text-3xl text-purple-600">0</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="font-semibold mb-2">API Calls (Last Hour)</h3>
+                    <p id="apiCalls" class="text-3xl text-purple-600">0</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex justify-between mb-4">
+                    <h3 class="text-xl font-semibold">User Management</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left border-b">
+                                <th class="pb-2">Email</th>
+                                <th class="pb-2">Role</th>
+                                <th class="pb-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTable">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden">
+        <div class="bg-white rounded-lg p-6 max-w-md mx-auto mt-20">
+            <h3 class="text-xl font-semibold mb-4">Settings</h3>
+            <form id="updateProfileForm">
+                <input type="text" id="fullName" class="w-full p-2 mb-4 border rounded" placeholder="Full Name">
+                <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">Update Profile</button>
+            </form>
+            <button onclick="showUpdatePassword()" class="mt-4 text-purple-600 hover:underline">Change Password</button>
+        </div>
+    </div>
+
+    <!-- Ticket Modal -->
+    <div id="ticketModal" class="fixed inset-0 bg-black bg-opacity-50 hidden">
+        <div class="bg-white rounded-lg p-6 max-w-md mx-auto mt-20">
+            <h3 class="text-xl font-semibold mb-4">Raise a Ticket</h3>
+            <form id="ticketForm">
+                <textarea class="w-full p-2 mb-4 border rounded" placeholder="Describe your issue" rows="4"></textarea>
+                <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">Submit Ticket</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const supabase = createClient(
+            'https://wqxlakambzrebifqszbo.supabase.co',
+            ' eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxeGxha2FtYnpyZWJpZnFzemJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxOTAzMjcsImV4cCI6MjA1OTc2NjMyN30.kIEpEt84s5sRAPmaN7Vb2oQCnXIHnKVxPFXD5gDqNuQ'
+        );
+
+        let currentUser = null;
+
+        // Initialize Dashboard
+        async function initDashboard() {
+            currentUser = JSON.parse(sessionStorage.getItem('user'));
+            if (!currentUser) window.location.href = '/login';
             
-            // Check if the user exists
-            const { data: userExists } = await supabase
-              .from("users")
-              .select("*")
-              .eq("email", userEmail);
-            
-            if (!userExists || userExists.length === 0) {
-              // Insert new user if they do not exist
-              await supabase.from("users").insert([{ email: userEmail, fullname: full_name, role: "user" }]);
+            await loadProfile();
+            checkAdminAccess();
+            setupRealTime();
+            loadAnalytics();
+        }
+
+        async function loadProfile() {
+            const { data, error } = await supabase
+                .from('users')
+                .select('*')
+                .eq('email', currentUser.email)
+                .single();
+
+            if (data) {
+                document.getElementById('profileContent').innerHTML = `
+                    <p><strong>Email:</strong> ${data.email}</p>
+                    <p><strong>Name:</strong> ${data.fullname}</p>
+                    <p><strong>Role:</strong> ${data.role}</p>
+                `;
             }
+        }
+
+        async function checkAdminAccess() {
+            const { data } = await supabase
+                .from('users')
+                .select('role')
+                .eq('email', currentUser.email)
+                .single();
+
+            if (data.role === 'admin') {
+                document.getElementById('adminDashboard').classList.remove('hidden');
+                loadUsers();
+            }
+        }
+
+        async function loadUsers() {
+            const { data } = await supabase.from('users').select('*');
+            const tbody = document.getElementById('usersTable');
+            tbody.innerHTML = data.map(user => `
+                <tr class="border-b">
+                    <td class="py-2">${user.email}</td>
+                    <td>${user.role}</td>
+                    <td>
+                        <button onclick="deleteUser('${user.id}')" class="text-red-500 hover:text-red-700">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('totalUsers').textContent = data.length;
+        }
+
+        async function loadAnalytics() {
+            // Get API calls from last hour
+            const { data } = await supabase
+                .rpc('count_api_calls_last_hour');
             
-            sessionStorage.setItem("user", JSON.stringify(data));
-            window.location.href = "/asliproject/dashboard.html";
-          }
-        },
-      });
-      
-      google.accounts.id.renderButton(document.getElementById("gSignInDiv"), {
-        theme: "outline",
-        size: "large",
-      });
-    };
-  </script>
+            document.getElementById('apiCalls').textContent = data;
+        }
+
+        function setupRealTime() {
+            supabase
+                .channel('custom-all-channel')
+                .on('postgres_changes', { event: '*', schema: 'public' }, () => {
+                    loadUsers();
+                    loadAnalytics();
+                })
+                .subscribe();
+        }
+
+        // Event Listeners
+        document.getElementById('menuBtn').addEventListener('click', () => {
+            document.getElementById('curtainMenu').classList.toggle('translate-x-full');
+        });
+
+        async function logout() {
+            await supabase.auth.signOut();
+            sessionStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+
+        // Admin Functions
+        async function deleteUser(userId) {
+            if (confirm('Are you sure?')) {
+                await supabase.from('users').delete().eq('id', userId);
+                loadUsers();
+            }
+        }
+
+        // Initialize when DOM loaded
+        document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
 </body>
-
 </html>
-
-
-
-
-
-
-
