@@ -8,22 +8,48 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #f0f4f8;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #667eea, #764ba2);
+      margin: 0;
+      padding: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 2rem;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    h2 {
+      color: white;
+      margin: 1rem;
+      text-align: center;
     }
 
     .auth-container {
       background: white;
       padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      width: 100%;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      width: 90%;
       max-width: 400px;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .auth-form input,
@@ -31,17 +57,63 @@
     .auth-form button {
       width: 100%;
       margin: 10px 0;
-      padding: 10px;
+      padding: 12px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    .auth-form button {
+      background-color: #667eea;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .auth-form button:hover {
+      background-color: #5a67d8;
+    }
+
+    .toggle-mode {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+
+    .toggle-mode span {
+      color: #667eea;
+      cursor: pointer;
+      text-decoration: underline;
     }
 
     .g_id_signin {
       margin-top: 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    @media screen and (max-width: 500px) {
+      .auth-container {
+        padding: 1.5rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      .auth-form input,
+      .auth-form select,
+      .auth-form button {
+        font-size: 0.95rem;
+        padding: 10px;
+      }
     }
   </style>
 </head>
 
 <body>
-  <h2>Kyro Auth</h2>
+  <h2>Welcome to Kyro Auth</h2>
   <div class="auth-container">
     <form id="auth-form" class="auth-form">
       <h3 id="form-title">Sign In</h3>
@@ -75,13 +147,18 @@
     const toggleLink = document.getElementById("toggle-link");
     const formTitle = document.getElementById("form-title");
 
-    toggleLink.onclick = () => {
-      mode = mode === "login" ? "signup" : "login";
-      formTitle.textContent = mode === "login" ? "Sign In" : "Sign Up";
-      extraFields.style.display = mode === "signup" ? "block" : "none";
-      toggleLink.textContent = mode === "login" ?
-        "Don't have an account? Sign up" :
-        "Already have an account? Login";
+    toggleLink.onclick = async () => {
+      if (mode === "login") {
+        mode = "signup";
+        formTitle.textContent = "Sign Up";
+        extraFields.style.display = "block";
+        toggleLink.textContent = "Already have an account? Login";
+      } else {
+        mode = "login";
+        formTitle.textContent = "Sign In";
+        extraFields.style.display = "none";
+        toggleLink.textContent = "Don't have an account? Sign up";
+      }
     };
 
     form.onsubmit = async (e) => {
@@ -100,6 +177,16 @@
           window.location.href = "/asliproject/dashboard.html";
         }
       } else {
+        const { data: exists } = await supabase
+          .from("users")
+          .select("email")
+          .eq("email", email);
+
+        if (exists && exists.length > 0) {
+          alert("This email is already registered. Please log in.");
+          return;
+        }
+
         if (!fullname || !role) {
           alert("Please fill full name and role");
           return;
@@ -121,7 +208,6 @@
       }
     };
 
-    // Google Login
     window.onload = function () {
       google.accounts.id.initialize({
         client_id: "1047818163471-vdijksv0ta6f0u1msu2e8gvd792097fi.apps.googleusercontent.com",
