@@ -16,7 +16,7 @@
       align-items: center;
       padding: 2rem;
     }
-    
+
     .auth-container {
       background: white;
       padding: 2rem;
@@ -25,7 +25,7 @@
       width: 100%;
       max-width: 400px;
     }
-    
+
     .auth-form input,
     .auth-form select,
     .auth-form button {
@@ -33,7 +33,7 @@
       margin: 10px 0;
       padding: 10px;
     }
-    
+
     .g_id_signin {
       margin-top: 20px;
     }
@@ -58,23 +58,23 @@
       <button type="submit" id="auth-button">Continue</button>
       <p class="toggle-mode"><span id="toggle-link">Don't have an account? Sign up</span></p>
     </form>
-    
+
     <hr />
     <div class="g_id_signin" id="gSignInDiv"></div>
   </div>
-  
+
   <script>
     const supabase = window.supabase.createClient(
       'https://wqxlakambzrebifqszbo.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxeGxha2FtYnpyZWJpZnFzemJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxOTAzMjcsImV4cCI6MjA1OTc2NjMyN30.kIEpEt84s5sRAPmaN7Vb2oQCnXIHnKVxPFXD5gDqNuQ'
     );
-    
+
     let mode = "login";
     const form = document.getElementById("auth-form");
     const extraFields = document.getElementById("extra-fields");
     const toggleLink = document.getElementById("toggle-link");
     const formTitle = document.getElementById("form-title");
-    
+
     toggleLink.onclick = () => {
       mode = mode === "login" ? "signup" : "login";
       formTitle.textContent = mode === "login" ? "Sign In" : "Sign Up";
@@ -83,14 +83,14 @@
         "Don't have an account? Sign up" :
         "Already have an account? Login";
     };
-    
+
     form.onsubmit = async (e) => {
       e.preventDefault();
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
       const fullname = document.getElementById("fullname").value;
       const role = document.getElementById("role").value;
-      
+
       if (mode === "login") {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
@@ -104,13 +104,13 @@
           alert("Please fill full name and role");
           return;
         }
-        
+
         const { data: signupData, error: signupError } = await supabase.auth.signUp({ email, password });
         if (signupError) {
           alert("Signup failed: " + signupError.message);
           return;
         }
-        
+
         const { error: insertError } = await supabase.from("users").insert([{ email, fullname, role }]);
         if (insertError) {
           alert("User data insert failed: " + insertError.message);
@@ -120,9 +120,9 @@
         }
       }
     };
-    
+
     // Google Login
-    window.onload = function() {
+    window.onload = function () {
       google.accounts.id.initialize({
         client_id: "1047818163471-vdijksv0ta6f0u1msu2e8gvd792097fi.apps.googleusercontent.com",
         callback: async (response) => {
@@ -130,27 +130,29 @@
             provider: "google",
             token: response.credential,
           });
-          
+
           if (error) {
             alert("Google login failed: " + error.message);
           } else {
-            console.log("Google Login Success", data);
             const userEmail = data.user.email;
+            const userMeta = data.user.user_metadata;
+            const full_name = userMeta.full_name || userMeta.name || "";
+
             const { data: userExists } = await supabase
               .from("users")
               .select("*")
               .eq("email", userEmail);
-            
+
             if (!userExists || userExists.length === 0) {
-              await supabase.from("users").insert([{ email: userEmail, fullname: data.user.user_metadata.full_name || "", role: "user" }]);
+              await supabase.from("users").insert([{ email: userEmail, fullname: full_name, role: "user" }]);
             }
-            
+
             sessionStorage.setItem("user", JSON.stringify(data));
             window.location.href = "/asliproject/dashboard.html";
           }
         },
       });
-      
+
       google.accounts.id.renderButton(document.getElementById("gSignInDiv"), {
         theme: "outline",
         size: "large",
