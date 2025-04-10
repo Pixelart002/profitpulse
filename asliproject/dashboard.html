@@ -2,175 +2,198 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kyro.ai Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kyro Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/@supabase/supabase-js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #0f172a;
-      color: white;
-    }
-    
-    .glass {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .fade-in {
-      animation: fadeIn 0.5s ease-in-out;
-    }
-    
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateX(20px);
-      }
-      
-      to {
-        opacity: 1;
-        transform: translateX(0);
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            kyro: '#0d3b66',
+            light: '#f9fbff',
+            soft: '#e0f2ff',
+          }
+        }
       }
     }
-  </style>
+  </script>
 </head>
 
-<body class="h-screen overflow-hidden">
-  <div class="flex h-full">
-    <div class="w-64 glass p-4 hidden md:block">
-      <h1 class="text-2xl font-bold mb-6">Kyro.ai</h1>
-      <nav class="space-y-3">
-        <button onclick="showSection('dashboard')">Dashboard</button>
-        <button onclick="showSection('ai-assistant')">AI Assistant</button>
-        <button onclick="showSection('credits')">Credits</button>
-        <button onclick="showSection('profile')">Profile</button>
-        <button onclick="showSection('settings')">Settings</button>
-      </nav>
-    </div>
+<body class="bg-gradient-to-br from-soft to-light font-sans">
+  <div id="app" class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="flex justify-between items-center px-6 py-4 bg-white shadow">
+      <h1 class="text-2xl font-bold text-kyro">Kyro AI</h1>
+      <div class="flex items-center gap-4">
+        <span id="creditDisplay" class="text-kyro font-semibold">Credits: 0</span>
+        <button onclick="logout()" class="bg-kyro text-white px-4 py-2 rounded-lg hover:bg-blue-700">Logout</button>
+      </div>
+    </header>
     
-    <div class="flex-1 overflow-y-auto">
-      <div class="glass flex justify-between items-center p-4 md:px-8">
-        <div class="text-xl font-semibold">Welcome, <span id="userName">User</span></div>
-        <div class="space-x-4">
-          <span class="text-blue-400 font-bold">Credits: <span id="creditCount">10</span></span>
-          <button onclick="logout()">Logout</button>
-        </div>
-      </div>
+    <!-- Body -->
+    <div class="flex flex-1">
+      <!-- Sidebar -->
+      <aside class="w-64 bg-white shadow-lg p-4 space-y-2">
+        <nav class="flex flex-col gap-2">
+          <button onclick="showSection('profile')" class="py-2 px-3 text-left hover:bg-soft rounded">Profile</button>
+          <button onclick="showSection('generator')" class="py-2 px-3 text-left hover:bg-soft rounded">Generate Content</button>
+          <button onclick="showSection('credits')" class="py-2 px-3 text-left hover:bg-soft rounded">Credits</button>
+          <button onclick="showSection('settings')" class="py-2 px-3 text-left hover:bg-soft rounded">Settings</button>
+        </nav>
+      </aside>
       
-      <div id="dashboard" class="p-4 fade-in">Main dashboard content...</div>
-      
-      <div id="ai-assistant" class="hidden p-4 fade-in">
-        <h2 class="text-xl mb-4 font-bold">AI Blogging Assistant</h2>
-        <textarea id="blogInput" class="w-full glass p-3 mb-3 rounded" rows="5" placeholder="Write your prompt..."></textarea>
-        <button onclick="generateBlog()" class="bg-blue-600 px-4 py-2 rounded">Generate</button>
-        <div id="generatedOutput" class="mt-4"></div>
-      </div>
-      
-      <div id="credits" class="hidden p-4 fade-in">
-        <h2 class="text-xl font-bold mb-4">Credits</h2>
-        <ul class="space-y-2">
-          <li>Total Credits Earned: <span id="totalCredits">10</span></li>
-          <li>By Tasks: <span id="taskCredits">0</span></li>
-          <li>By Social: <span id="socialCredits">0</span></li>
-          <li>Purchased: <span id="purchasedCredits">0</span></li>
-          <li class="text-blue-400">Remaining: <span id="creditCountBottom">10</span></li>
-        </ul>
-      </div>
-      
-      <div id="profile" class="hidden p-4 fade-in">
-        <h2 class="text-xl font-bold mb-4">Profile</h2>
-        <div class="space-y-3">
-          <input id="profileName" class="glass w-full p-2 rounded" placeholder="Name" />
-          <input id="profileEmail" class="glass w-full p-2 rounded" disabled placeholder="Email" />
-          <input id="profilePassword" type="password" class="glass w-full p-2 rounded" placeholder="New Password" />
-          <button onclick="saveProfile()" class="bg-blue-500 px-4 py-2 rounded">Save</button>
-          <p id="profileSaved" class="text-green-400 hidden">Your data is saved.</p>
-        </div>
-      </div>
-      
-      <div id="settings" class="hidden p-4 fade-in">
-        <h2 class="text-xl font-bold mb-4">Settings</h2>
-        <p class="mb-2">Request password reset:</p>
-        <input id="resetEmail" class="glass w-full p-2 rounded" placeholder="Enter email" />
-        <button onclick="requestReset()" class="bg-blue-500 mt-2 px-4 py-2 rounded">Send Magic Link</button>
-      </div>
+      <!-- Main Content -->
+      <main class="flex-1 p-6 overflow-auto">
+        <!-- Profile Section -->
+        <section id="profile" class="hidden">
+          <h2 class="text-2xl font-semibold mb-4">Welcome, <span id="displayName"></span></h2>
+          <div class="bg-white p-4 rounded-lg shadow space-y-4">
+            <div class="flex items-center space-x-6">
+              <img id="userPic" class="w-24 h-24 rounded-full border-4 border-kyro" alt="Profile Picture">
+              <div>
+                <p><strong>Name:</strong> <span id="fullName"></span></p>
+                <p><strong>Email:</strong> <span id="email"></span></p>
+                <p><strong>Role:</strong> <span id="role"></span></p>
+              </div>
+            </div>
+            <div class="space-x-2">
+              <button onclick="toggleEdit(true)" class="bg-kyro text-white px-4 py-2 rounded">Edit</button>
+              <button onclick="requestPasswordReset()" class="bg-gray-300 px-4 py-2 rounded">Reset Password</button>
+            </div>
+            <div id="editForm" class="hidden space-y-3">
+              <input id="editName" type="text" class="w-full px-3 py-2 border rounded" placeholder="New name">
+              <input id="editPic" type="file" class="w-full" onchange="uploadProfilePic(this.files[0])">
+              <div class="space-x-2">
+                <button onclick="saveName()" class="bg-green-600 text-white px-4 py-2 rounded">Save</button>
+                <button onclick="toggleEdit(false)" class="bg-red-500 text-white px-4 py-2 rounded">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Generator Section -->
+        <section id="generator" class="hidden">
+          <h2 class="text-2xl font-semibold mb-4">AI Content Generator</h2>
+          <textarea id="promptInput" class="w-full border rounded p-4" rows="5" placeholder="Enter your topic or prompt..."></textarea>
+          <button onclick="generateContent()" class="mt-4 bg-kyro text-white px-4 py-2 rounded">Generate</button>
+          <div id="outputArea" class="mt-6 p-4 bg-white rounded-lg shadow whitespace-pre-wrap"></div>
+        </section>
+        
+        <!-- Credits Section -->
+        <section id="credits" class="hidden">
+          <h2 class="text-2xl font-semibold mb-4">Credits</h2>
+          <div class="bg-white p-4 rounded-lg shadow space-y-2">
+            <p><strong>Total Credits:</strong> <span id="totalCredits">0</span></p>
+            <p><strong>Earned via Social:</strong> <span id="socialCredits">0</span></p>
+            <p><strong>Earned via Tasks:</strong> <span id="taskCredits">0</span></p>
+            <p><strong>Purchased Credits:</strong> <span id="purchasedCredits">0</span></p>
+          </div>
+        </section>
+        
+        <!-- Settings Section -->
+        <section id="settings" class="hidden">
+          <h2 class="text-2xl font-semibold mb-4">Settings</h2>
+          <p class="text-gray-600">Coming soon...</p>
+        </section>
+      </main>
     </div>
   </div>
   
+  <!-- Notification -->
+  <div id="notification" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-kyro text-white px-6 py-3 rounded shadow hidden z-50"></div>
+  
+  <!-- Script Logic -->
   <script>
-    const supabase = supabase.createClient('https://wqxlakambzrebifqszbo.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxeGxha2FtYnpyZWJpZnFzemJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxOTAzMjcsImV4cCI6MjA1OTc2NjMyN30.kIEpEt84s5sRAPmaN7Vb2oQCnXIHnKVxPFXD5gDqNuQ');
+    const supabase = window.supabase.createClient('https://wqxlakambzrebifqszbo.supabase.co', '1047818163471-vdijksv0ta6f0u1msu2e8gvd792097fi.apps.googleusercontent.com');
+    const session = JSON.parse(sessionStorage.getItem('user'));
+    const email = session?.user?.email;
+    const userPic = session?.user?.user_metadata?.avatar_url;
     
-    const showSection = (id) => {
-      ['dashboard', 'ai-assistant', 'credits', 'profile', 'settings'].forEach(el => {
-        document.getElementById(el).classList.add('hidden');
-      });
+    function showSection(id) {
+      document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
       document.getElementById(id).classList.remove('hidden');
     }
     
-    const generateBlog = async () => {
-      const input = document.getElementById('blogInput').value;
-      if (!input) return alert("Enter something");
-      const { data, error } = await supabase.functions.invoke('generate-blog', { body: { prompt: input } });
-      if (error) return alert("Error generating blog");
-      document.getElementById('generatedOutput').innerHTML = `<div class='mt-2 glass p-4 rounded'>${data.output}</div>`;
-      updateCredits(-1);
+    function showNotification(msg) {
+      const note = document.getElementById('notification');
+      note.textContent = msg;
+      note.classList.remove('hidden');
+      setTimeout(() => note.classList.add('hidden'), 3000);
     }
     
-    const updateCredits = async (amount) => {
-      let currentCredits = parseInt(document.getElementById('creditCount').textContent);
-      currentCredits += amount;
-      document.getElementById('creditCount').textContent = currentCredits;
-      document.getElementById('creditCountBottom').textContent = currentCredits;
-      await supabase.from('profiles').update({ credits: currentCredits }).eq('id', user.id);
+    async function fetchUserData() {
+      const { data } = await supabase.from('users').select('*').eq('email', email).single();
+      document.getElementById('displayName').textContent = data.fullname;
+      document.getElementById('fullName').textContent = data.fullname;
+      document.getElementById('email').textContent = email;
+      document.getElementById('role').textContent = data.role;
+      document.getElementById('userPic').src = data.avatar_url || 'default-avatar-url.jpg'; // Set default avatar if none
+      document.getElementById('editName').value = data.fullname;
+      document.getElementById('creditDisplay').textContent = `Credits: ${data.credits || 0}`;
+      document.getElementById('totalCredits').textContent = data.credits || 0;
+      document.getElementById('socialCredits').textContent = data.social_credits || 0;
+      document.getElementById('taskCredits').textContent = data.task_credits || 0;
+      document.getElementById('purchasedCredits').textContent = data.purchased_credits || 0;
     }
     
-    const saveProfile = async () => {
-      const name = document.getElementById('profileName').value;
-      const password = document.getElementById('profilePassword').value;
-      const updates = { user_metadata: { name } };
-      if (password) updates.password = password;
-      const { error } = await supabase.auth.updateUser(updates);
-      if (error) return alert("Error saving profile");
-      document.getElementById('profileSaved').classList.remove('hidden');
-      setTimeout(() => document.getElementById('profileSaved').classList.add('hidden'), 3000);
+    function toggleEdit(show) {
+      document.getElementById('editForm').classList.toggle('hidden', !show);
     }
     
-    const requestReset = async () => {
-      const email = document.getElementById('resetEmail').value;
-      if (!email) return alert("Email required");
-      await supabase.auth.resetPasswordForEmail(email);
-      alert("Magic link sent to your email");
+    async function saveName() {
+      const newName = document.getElementById('editName').value;
+      await supabase.from('users').update({ fullname: newName }).eq('email', email);
+      showNotification('Profile updated');
+      toggleEdit(false);
+      fetchUserData();
     }
     
-    const logout = async () => {
-      await supabase.auth.signOut();
-      location.reload();
+    async function requestPasswordReset() {
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (!error) showNotification('Password reset link sent');
     }
     
-    let user = null;
-    document.addEventListener('DOMContentLoaded', async () => {
-      const { data, error } = await supabase.auth.getUser();
-      if (error || !data.user) return alert("Not logged in");
-      user = data.user;
-      document.getElementById('userName').textContent = user.user_metadata.name;
-      document.getElementById('profileName').value = user.user_metadata.name;
-      document.getElementById('profileEmail').value = user.email;
+    async function uploadProfilePic(file) {
+      const user = supabase.auth.user();
+      const fileName = `${user.id}/profile_pic.png`; // Unique name for the user's profile picture
+      const { data, error } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file);
       
-      const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      if (profileData) {
-        document.getElementById('creditCount').textContent = profileData.credits;
-        document.getElementById('creditCountBottom').textContent = profileData.credits;
-        document.getElementById('totalCredits').textContent = profileData.total_credits || 0;
-        document.getElementById('taskCredits').textContent = profileData.task_credits || 0;
-        document.getElementById('socialCredits').textContent = profileData.social_credits || 0;
-        document.getElementById('purchasedCredits').textContent = profileData.purchased_credits || 0;
+      if (error) {
+        console.error("Error uploading file: ", error.message);
+        return;
       }
-    });
+      
+      const avatarUrl = `${supabase.storageUrl}/avatars/${fileName}`;
+      
+      // Update avatar URL in the database
+      await supabase.from('users').update({ avatar_url: avatarUrl }).eq('email', user.email);
+      showNotification("Profile picture updated!");
+      
+      // Refresh profile data
+      fetchUserData();
+    }
+    
+    async function generateContent() {
+      const prompt = document.getElementById('promptInput').value;
+      if (!prompt.trim()) return showNotification('Prompt required');
+      document.getElementById('outputArea').textContent = 'Generating...';
+      await new Promise(r => setTimeout(r, 2000));
+      const generated = `Generated content for: "${prompt}"\n\nLorem ipsum dolor sit amet...`;
+      document.getElementById('outputArea').textContent = generated;
+    }
+    
+    function logout() {
+      sessionStorage.clear();
+      window.location.href = '/asliproject/auth.html';
+    }
+    
+    fetchUserData();
+    showSection('profile');
   </script>
 </body>
 
