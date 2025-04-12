@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,16 +12,20 @@
       transform: translateY(-100%);
       transition: transform 0.3s ease-in-out;
     }
+    
     .header-visible {
       transform: translateY(0);
       transition: transform 0.3s ease-in-out;
     }
+    
     .content-section {
       display: none;
     }
+    
     .visible {
       display: block;
     }
+    
     .profile-card {
       border-left: 2px solid #ddd;
       border-right: 2px solid #ddd;
@@ -32,6 +37,7 @@
       align-items: center;
       background-color: #fff;
     }
+    
     .profile-pic {
       width: 120px;
       height: 120px;
@@ -39,6 +45,7 @@
       border: 2px solid #ddd;
       margin-bottom: 20px;
     }
+    
     .badge {
       background-color: #ff5722;
       color: white;
@@ -50,93 +57,287 @@
       right: 10px;
     }
   </style>
-</head>
-<body class="bg-gray-100">
-<header id="main-header" class="fixed top-4 left-0 right-0 mx-4 bg-white shadow-lg rounded-2xl px-4 py-2 flex items-center justify-between z-50 header-visible">
-  <div class="flex items-center gap-4">
-    <h1 class="text-lg font-bold">Kyro.AI</h1>
-    <span id="credits-badge" class="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full">Credits: <strong id="credits-amount">0</strong></span>
-  </div>
-  <button id="hamburger-btn" class="p-2 border border-gray-400 rounded-md focus:outline-none">
-    <i data-feather="menu" class="w-6 h-6"></i>
-  </button>
-</header>
-
-<!-- Dropdown menu here -->
-
-<main class="pt-28 px-4 max-w-4xl mx-auto relative z-0">
-  <div class="text-2xl font-bold text-gray-800 mb-2 text-center sm:text-left">Welcome, User!</div>
-  <div id="breadcrumbs" class="text-sm text-gray-500 mb-10">Home</div>
-
-  <!-- Credits section -->
-  <section id="credits" class="content-section visible">
-    <h2 class="text-xl font-semibold mb-4">Credits</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="bg-white shadow rounded-lg p-4">
-        <h3 class="text-lg font-medium mb-2">Total Earned</h3>
-        <p id="total-earned" class="text-blue-600 text-2xl font-bold">0</p>
-      </div>
-      <div class="bg-white shadow rounded-lg p-4">
-        <h3 class="text-lg font-medium mb-2">Earned by Tasks</h3>
-        <p id="earned-by-tasks" class="text-green-600 text-2xl font-bold">0</p>
-      </div>
-      <div class="bg-white shadow rounded-lg p-4">
-        <h3 class="text-lg font-medium mb-2">Earned by Social</h3>
-        <p id="earned-by-social" class="text-purple-600 text-2xl font-bold">0</p>
-      </div>
-      <div class="bg-white shadow rounded-lg p-4">
-        <h3 class="text-lg font-medium mb-2">Purchased</h3>
-        <p id="purchased" class="text-yellow-600 text-2xl font-bold">0</p>
-      </div>
-      <div class="bg-white shadow rounded-lg p-4 md:col-span-2">
-        <h3 class="text-lg font-medium mb-2">Remaining Credits</h3>
-        <p id="remaining-credits" class="text-red-600 text-3xl font-bold">0</p>
-      </div>
-    </div>
-  </section>
-</main>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-<script>
-  const supabase = supabase.createClient('https://qfdlvfwrbqmswgzzqvry.supabase.co', ' eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxeGxha2FtYnpyZWJpZnFzemJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxOTAzMjcsImV4cCI6MjA1OTc2NjMyN30.kIEpEt84s5sRAPmaN7Vb2oQCnXIHnKVxPFXD5gDqNuQ');
-
-  // Listen for real-time changes in the credits table
-  supabase
-    .from('credits')
-    .on('UPDATE', payload => {
-      console.log('Credits Updated:', payload.new);
-      updateCreditsSection(payload.new);
-    })
-    .subscribe();
-
-  function updateCreditsSection(data) {
-    document.getElementById('total-earned').textContent = data.total_earned;
-    document.getElementById('earned-by-tasks').textContent = data.earned_by_tasks;
-    document.getElementById('earned-by-social').textContent = data.earned_by_social;
-    document.getElementById('purchased').textContent = data.purchased;
-    document.getElementById('remaining-credits').textContent = data.remaining_credits;
-    document.getElementById('credits-amount').textContent = data.remaining_credits;
-  }
-
-  // Listen for real-time updates on the user profile
-  supabase
-    .from('users')
-    .on('UPDATE', payload => {
-      console.log('User Profile Updated:', payload.new);
-      updateProfile(payload.new);
-    })
-    .subscribe();
-
-  function updateProfile(data) {
-    // Example: update profile picture
-    const profilePic = document.querySelector('.profile-pic');
-    if (profilePic) {
-      profilePic.src = data.profile_picture;  // Assuming the picture URL is stored
+  <script defer>
+    document.addEventListener("DOMContentLoaded", () => {
+      feather.replace();
+      const btn = document.getElementById("hamburger-btn");
+      const menu = document.getElementById("dropdown-menu");
+      const header = document.getElementById("main-header");
+      let lastScrollTop = 0;
+      if (btn) {
+        btn.addEventListener("click", () => menu.classList.toggle("hidden"));
+      }
+      const settingsBtn = document.getElementById("settings-btn");
+      const settingsSubmenu = document.getElementById("settings-submenu");
+      if (settingsBtn && settingsSubmenu) {
+        settingsBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          settingsSubmenu.classList.toggle("hidden");
+        });
+      }
+      const menuLinks = document.querySelectorAll('#dropdown-menu a, #dropdown-menu div');
+      menuLinks.forEach(link => {
+        link.addEventListener('click', () => menu.classList.add("hidden"));
+      });
+      window.addEventListener("scroll", () => {
+        let st = window.pageYOffset || document.documentElement.scrollTop;
+        if (st > lastScrollTop && st > 50) {
+          header.classList.add("header-hidden");
+          header.classList.remove("header-visible");
+        } else if (st < lastScrollTop) {
+          header.classList.add("header-visible");
+          header.classList.remove("header-hidden");
+        }
+        lastScrollTop = st <= 0 ? 0 : st;
+      });
+    });
+    
+    function showPage(page) {
+      const sections = document.querySelectorAll('.content-section');
+      sections.forEach(section => section.classList.remove('visible'));
+      const selectedPage = document.getElementById(page);
+      if (selectedPage) selectedPage.classList.add('visible');
+      const breadcrumbs = document.getElementById('breadcrumbs');
+      if (breadcrumbs) breadcrumbs.textContent = 'Home / ' + page.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     }
-  }
+  </script>
+</head>
 
-  // Profile page interaction and other logic...
-
-</script>
+<body class="bg-gray-100">
+  <!-- Updated Header with Credits card positioned to the left of the hamburger menu -->
+  <header id="main-header" class="fixed top-4 left-0 right-0 mx-4 bg-white shadow-lg rounded-2xl px-4 py-2 flex items-center justify-between z-50 header-visible">
+    <div class="flex items-center gap-4">
+      <h1 class="text-lg font-bold">Kyro.AI</h1>
+      
+      
+      
+      
+      <span class="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full">Credits: <strong id="credits-count">7</strong></span>
+      
+      
+    </div> <button id="hamburger-btn" class="p-2 border border-gray-400 rounded-md focus:outline-none"> <i data-feather="menu" class="w-6 h-6"></i> </button>
+  </header>
+  
+  
+  
+  
+  <!-- Dropdown menu -->
+  <div id="dropdown-menu" class="hidden fixed top-20 right-4 bg-white border border-gray-300 rounded-lg shadow-lg w-64 max-w-full py-2 z-50">
+    <a class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer" onclick="showPage('profile')">
+      <i data-feather="user"></i> Profile
+    </a>
+    <div class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer" id="settings-btn">
+      <i data-feather="settings"></i> Settings
+    </div>
+    <div id="settings-submenu" class="hidden pl-10 text-sm">
+      <a class="block px-4 py-1 hover:bg-gray-100 cursor-pointer" onclick="showPage('update-password')">Update Password</a>
+      <a class="block px-4 py-1 hover:bg-gray-100 cursor-pointer" onclick="showPage('update-profile')">Update Profile</a>
+    </div>
+    <a class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer" onclick="showPage('credits')">
+      <i data-feather="dollar-sign"></i> Credits
+    </a>
+    <a class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer" onclick="showPage('raise-ticket')">
+      <i data-feather="help-circle"></i> Raise a Ticket
+    </a>
+    <a class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer" onclick="showPage('privacy-policy')">
+      <i data-feather="lock"></i> Privacy Policy
+    </a>
+    <a class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer" onclick="showPage('about')">
+      <i data-feather="info"></i> About
+    </a>
+    <a class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer" onclick="showPage('faq')">
+      <i data-feather="help-circle"></i> FAQ
+    </a>
+  </div>
+  
+  <main class="pt-28 px-4 max-w-4xl mx-auto relative z-0">
+    <div class="text-2xl font-bold text-gray-800 mb-2 text-center sm:text-left">Welcome, User!</div>
+    <div id="breadcrumbs" class="text-sm text-gray-500 mb-10">Home</div>
+    
+    <!-- Profile Page -->
+    <section id="profile" class="content-section visible">
+      <div class="profile-card relative w-full max-w-sm mx-auto">
+        <img src="https://via.placeholder.com/120" alt="Profile Picture" class="profile-pic">
+        <div class="text-center mt-4">
+          <h3 class="text-lg font-semibold">John Doe</h3>
+          <p class="text-gray-600">Admin</p>
+          <p class="text-gray-600 break-all">johndoe@example.com</p>
+        </div>
+        <div class="badge">Admin</div>
+      </div>
+    </section>
+    
+    <!-- Credits Page -->
+    <section id="credits" class="content-section">
+      <h2 class="text-xl font-semibold mb-4">Credits</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white shadow rounded-lg p-4">
+          <h3 class="text-lg font-medium mb-2">Total Earned</h3>
+          <p class="text-blue-600 text-2xl font-bold">25</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-4">
+          <h3 class="text-lg font-medium mb-2">Earned by Tasks</h3>
+          <p class="text-green-600 text-2xl font-bold">10</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-4">
+          <h3 class="text-lg font-medium mb-2">Earned by Social</h3>
+          <p class="text-purple-600 text-2xl font-bold">5</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-4">
+          <h3 class="text-lg font-medium mb-2">Purchased</h3>
+          <p class="text-yellow-600 text-2xl font-bold">10</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-4 md:col-span-2">
+          <h3 class="text-lg font-medium mb-2">Remaining Credits</h3>
+          <p class="text-red-600 text-3xl font-bold" id="credits-display">7</p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Update Password Page -->
+    <section id="update-password" class="content-section">
+      <h2 class="text-xl font-semibold mb-4">Update Password</h2>
+      <form onsubmit="updatePassword(event)" class="max-w-md mx-auto bg-white p-6 rounded-lg shadow">
+        <div class="mb-4">
+          <label for="current-password" class="block text-gray-700 mb-2">Current Password</label>
+          <input id="current-password" type="password" class="w-full border border-gray-300 p-2 rounded" required>
+        </div>
+        <div class="mb-4">
+          <label for="new-password" class="block text-gray-700 mb-2">New Password</label>
+          <input id="new-password" type="password" class="w-full border border-gray-300 p-2 rounded" required>
+        </div>
+        <div class="mb-4">
+          <label for="confirm-password" class="block text-gray-700 mb-2">Confirm New Password</label>
+          <input id="confirm-password" type="password" class="w-full border border-gray-300 p-2 rounded" required>
+        </div>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Update Password</button>
+      </form>
+    </section>
+    
+    <!-- Update Profile Page -->
+    <section id="update-profile" class="content-section">
+      <h2 class="text-xl font-semibold mb-4">Update Profile</h2>
+      <form onsubmit="updateProfile(event)" class="max-w-md mx-auto bg-white p-6 rounded-lg shadow">
+        <div class="mb-4">
+          <label for="profile-name" class="block text-gray-700 mb-2">Name</label>
+          <input id="profile-name" type="text" class="w-full border border-gray-300 p-2 rounded" value="John Doe" required>
+        </div>
+        <div class="mb-4">
+          <label for="profile-email" class="block text-gray-700 mb-2">Email</label>
+          <input id="profile-email" type="email" class="w-full border border-gray-300 p-2 rounded" value="johndoe@example.com" required>
+        </div>
+        <div class="mb-4">
+          <label for="profile-picture" class="block text-gray-700 mb-2">Profile Picture URL</label>
+          <input id="profile-picture" type="text" class="w-full border border-gray-300 p-2 rounded" value="https://via.placeholder.com/120">
+        </div>
+        <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Update Profile</button>
+      </form>
+    </section>
+    
+    <!-- Raise a Ticket Page -->
+    <section id="raise-ticket" class="content-section">
+      <h2 class="text-xl font-semibold mb-4">Raise a Ticket</h2>
+      <form onsubmit="raiseTicket(event)" class="max-w-md mx-auto bg-white p-6 rounded-lg shadow">
+        <div class="mb-4">
+          <label for="ticket-subject" class="block text-gray-700 mb-2">Subject</label>
+          <input id="ticket-subject" type="text" class="w-full border border-gray-300 p-2 rounded" required>
+        </div>
+        <div class="mb-4">
+          <label for="ticket-message" class="block text-gray-700 mb-2">Message</label>
+          <textarea id="ticket-message" class="w-full border border-gray-300 p-2 rounded" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">Submit Ticket</button>
+      </form>
+    </section>
+    
+    <!-- (Optional) Other sections like Privacy Policy, About, FAQ can be added here -->
+  </main>
+  
+  <!-- Supabase Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    // Supabase initialization – make sure you replace the key with your actual Supabase anon/public key.
+    const supabaseClient = supabase.createClient('https://qfdlvfwrbqmswgzzqvry.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxeGxha2FtYnpyZWJpZnFzemJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxOTAzMjcsImV4cCI6MjA1OTc2NjMyN30.kIEpEt84s5sRAPmaN7Vb2oQCnXIHnKVxPFXD5gDqNuQ');
+    
+    // Function to update the profile based on the users table.
+    async function updateProfile(event) {
+      event.preventDefault();
+      const name = document.getElementById('profile-name').value;
+      const email = document.getElementById('profile-email').value;
+      const profilePicture = document.getElementById('profile-picture').value;
+      
+      const { data, error } = await supabaseClient
+        .from('users')
+        .update({ name, email, profile_picture: profilePicture })
+        .eq('id', 'CURRENT_USER_UUID'); // Replace with your current user UUID
+      
+      if (error) {
+        alert('Error updating profile: ' + error.message);
+      } else {
+        alert('Profile updated successfully');
+        // Optionally update UI elements with new data here.
+      }
+    }
+    
+    // Function to update the user password.
+    async function updatePassword(event) {
+      event.preventDefault();
+      const currentPassword = document.getElementById('current-password').value;
+      const newPassword = document.getElementById('new-password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      
+      if (newPassword !== confirmPassword) {
+        alert('New passwords do not match!');
+        return;
+      }
+      
+      // Using Supabase Auth method to update password.
+      const { data, error } = await supabaseClient.auth.updateUser({ password: newPassword });
+      if (error) {
+        alert('Error updating password: ' + error.message);
+      } else {
+        alert('Password updated successfully');
+      }
+    }
+    
+    // Function to raise a ticket – assumes an existing tickets table.
+    async function raiseTicket(event) {
+      event.preventDefault();
+      const subject = document.getElementById('ticket-subject').value;
+      const message = document.getElementById('ticket-message').value;
+      
+      const { data, error } = await supabaseClient
+        .from('tickets')
+        .insert([{ subject, message, user_id: 'CURRENT_USER_UUID' }]); // Replace with actual user id
+      if (error) {
+        alert('Error raising ticket: ' + error.message);
+      } else {
+        alert('Ticket submitted successfully');
+      }
+    }
+    
+    // Function to load credits in realtime from the credits table.
+    async function loadCredits() {
+      let { data, error } = await supabaseClient
+        .from('credits')
+        .select('*')
+        .eq('user_id', 'CURRENT_USER_UUID'); // Replace with actual user id
+      
+      if (!error && data && data.length > 0) {
+        const remaining = data[0].remaining_credits;
+        document.getElementById('credits-count').innerText = remaining;
+        document.getElementById('credits-display').innerText = remaining;
+      }
+    }
+    
+    document.addEventListener("DOMContentLoaded", () => {
+      // Initially load credits from your Supabase DB.
+      loadCredits();
+    });
+  </script>
+  <script>
+    feather.replace();
+  </script>
 </body>
+
 </html>
