@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kyro.AI Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/feather-icons"></script>
+  <style>
+    .header-hidden {
+      transform: translateY(-100%);
+      transition: transform 0.3s ease-in-out;
+    }
+    .header-visible {
+      transform: translateY(0);
+      transition: transform 0.3s ease-in-out;
+    }
+    .content-section {
+      display: none;
+    }
+    .visible {
+      display: block;
+    }
+    .profile-card {
+      border-left: 2px solid #ddd;
+      border-right: 2px solid #ddd;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #fff;
+    }
+    .profile-pic {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 2px solid #ddd;
+      margin-bottom: 20px;
+    }
+    .badge {
+      background-color: #ff5722;
+      color: white;
+      padding: 4px 12px;
+      font-size: 12px;
+      border-radius: 20px;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+  </style>
+  <script defer>
+    document.addEventListener("DOMContentLoaded", () => {
+      feather.replace();
+      const btn = document.getElementById("hamburger-btn");
+      const menu = document.getElementById("dropdown-menu");
+      const header = document.getElementById("main-header");
+      let lastScrollTop = 0;
+      if (btn) {
+        btn.addEventListener("click", () => menu.classList.toggle("hidden"));
+      }
+      const settingsBtn = document.getElementById("settings-btn");
+      const settingsSubmenu = document.getElementById("settings-submenu");
+      if (settingsBtn && settingsSubmenu) {
+        settingsBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          settingsSubmenu.classList.toggle("hidden");
+        });
+      }
+      const menuLinks = document.querySelectorAll('#dropdown-menu a');
+      menuLinks.forEach(link => {
+        link.addEventListener('click', () => menu.classList.add("hidden"));
+      });
+      window.addEventListener("scroll", () => {
+        let st = window.pageYOffset || document.documentElement.scrollTop;
+        if (st > lastScrollTop && st > 50) {
+          header.classList.add("header-hidden");
+          header.classList.remove("header-visible");
+        } else if (st < lastScrollTop) {
+          header.classList.add("header-visible");
+          header.classList.remove("header-hidden");
+        }
+        lastScrollTop = st <= 0 ? 0 : st;
+      });
+    });
+
+    function showPage(page) {
+      const sections = document.querySelectorAll('.content-section');
+      sections.forEach(section => section.classList.remove('visible'));
+      const selectedPage = document.getElementById(page);
+      if (selectedPage) selectedPage.classList.add('visible');
+      const breadcrumbs = document.getElementById('breadcrumbs');
+      if (breadcrumbs) breadcrumbs.textContent = 'Home / ' + page.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+  </script>
+</head>
+<body class="bg-gray-100">
+  <header id="main-header" class="fixed top-4 left-0 right-0 mx-4 bg-white shadow-lg rounded-2xl px-4 py-2 flex items-center justify-between z-50 header-visible">
+    <div class="flex items-center gap-4">
+      <h1 class="text-lg font-bold">Kyro.AI</h1>
+      <span class="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full">Credits: <strong>7</strong></span>
+    </div>
+    <button id="hamburger-btn" class="p-2 border border-gray-400 rounded-md focus:outline-none">
+      <i data-feather="menu" class="w-6 h-6"></i>
+    </button>
+  </header>
+  <div id="dropdown-menu" class="hidden fixed top-20 right-4 bg-white border border-gray-300 rounded-lg shadow-lg w-64 max-w-full py-2 z-50">
+    <a class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer" onclick="showPage('profile')">
+      <i data-feather="user"></i> Profile
+    </a>
+    <div class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer" id="settings-btn">
+      <i data-feather="settings"></i> Settings
+    </div>
+    <div id="settings-submenu" class="hidden pl-10 text-sm">
+      <a class="block px-4 py-1 hover:bg-gray-100 cursor-pointer" onclick="showPage('update-password')">Update Password</a>
+      <a class="block px-4 py-1 hover:bg-gray-100 cursor-pointer" onclick="showPage('update-profile')">Update Profile</a>
+    </div>
+    <a class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer" onclick="showPage('credits')">
+      <i data-feather="dollar-sign"></i> Credits
+    </a>
+    <a class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer" onclick="showPage('raise-ticket')">
+      <i data-feather="help-circle"></i> Raise a Ticket
+    </a>
+    <a class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer" onclick="showPage('privacy-policy')">
+      <i data-feather="lock"></i> Privacy Policy
+    </a>
+    <a class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer" onclick="showPage('about')">
+      <i data-feather="info"></i> About
+    </a>
+    <a class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer" onclick="showPage('faq')">
+      <i data-feather="help-circle"></i> FAQ
+    </a>
+  </div>
+  <main class="pt-28 px-4 max-w-4xl mx-auto relative z-0">
+    <div class="text-2xl font-bold text-gray-800 mb-2 text-center sm:text-left">Welcome, User!</div>
+    <div id="breadcrumbs" class="text-sm text-gray-500 mb-10">Home</div>
+
+    <section id="profile" class="content-section visible">
+      <div class="profile-card relative w-full max-w-sm mx-auto">
+        <img src="https://via.placeholder.com/120" alt="Profile Picture" class="profile-pic">
+        <div class="text-center mt-4">
+          <h3 class="text-lg font-semibold">John Doe</h3>
+          <p class="text-gray-600">Admin</p>
+          <p class="text-gray-600 break-all">johndoe@example.com</p>
+        </div>
+        <div class="badge">Admin</div>
+      </div>
+    </section>
+
+    <section id="credits" class="content-section">
+      <h2 class="text-xl font-semibold mb-4">Credits</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white shadow rounded-lg p-4">
+          <h3 class="text-lg font-medium mb-2">Total Earned</h3>
+          <p class="text-blue-600 text-2xl font-bold">25</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-4">
+          <h3 class="text-lg font-medium mb-2">Earned by Tasks</h3>
+          <p class="text-green-600 text-2xl font-bold">10</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-4">
+          <h3 class="text-lg font-medium mb-2">Earned by Social</h3>
+          <p class="text-purple-600 text-2xl font-bold">5</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-4">
+          <h3 class="text-lg font-medium mb-2">Purchased</h3>
+          <p class="text-yellow-600 text-2xl font-bold">10</p>
+        </div>
+        <div class="bg-white shadow rounded-lg p-4 md:col-span-2">
+          <h3 class="text-lg font-medium mb-2">Remaining Credits</h3>
+          <p class="text-red-600 text-3xl font-bold">7</p>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script>feather.replace();</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>
+    const supabase = supabase.createClient('https://qfdlvfwrbqmswgzzqvry.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxeGxha2FtYnpyZWJpZnFzemJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxOTAzMjcsImV4cCI6MjA1OTc2NjMyN30.kIEpEt84s5sRAPmaN7Vb2oQCnXIHnKVxPFXD5gDqNuQ');
+  </script>
+</body>
+</html>

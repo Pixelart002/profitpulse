@@ -97,7 +97,7 @@
           alert("Login failed: " + error.message);
         } else {
           sessionStorage.setItem("user", JSON.stringify(data));
-          window.location.href = "/dashboard.html";
+          window.location.href = "/main-dashboard.html";
         }
       } else {
         if (!fullname || !role) {
@@ -116,7 +116,7 @@
           alert("User data insert failed: " + insertError.message);
         } else {
           sessionStorage.setItem("user", JSON.stringify(signupData));
-          window.location.href = "/dashboard.html";
+          window.location.href = "/main-dashboard.html";
         }
       }
     };
@@ -146,7 +146,7 @@
             }
             
             sessionStorage.setItem("user", JSON.stringify(data));
-            window.location.href = "/dashboard.html";
+            window.location.href = "/main-dashboard.html";
           }
         },
       });
