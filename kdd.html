@@ -1,0 +1,46 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas with Unsplash Images</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="myCanvas"></canvas>
+<img src="https://source.unsplash.com/1600x900/?nature"   />
+⇝
+
+<script>
+    const canvas = document.getElementById('myCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Set canvas size to match window size
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Function to load an image from Unsplash and draw it to the canvas
+    function loadAndDrawImage(imageUrl) {
+        const img = new Image();
+        img.src = imageUrl;
+        img.onload = () => {
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height); // Draw the image to fill the canvas
+        };
+    }
+
+    // Example Unsplash image URL (you can change the query parameter for different results)
+    const unsplashImageURL = 'https://source.unsplash.com/1600x900/?nature';  // Get a random nature image
+    loadAndDrawImage(unsplashImageURL);
+</script>
+
+</body>
+</html>

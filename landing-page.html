@@ -1,0 +1,471 @@
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   Low-Code Automation Platform
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+  <style>
+   body {
+     font-family: 'Roboto', sans-serif;
+   }
+  </style>
+ </head>
+ <body class="bg-gray-900 text-white">
+  <header class="fixed top-0 left-0 right-0 bg-gray-900 flex justify-between items-center p-4 z-50">
+   <div class="flex items-center">
+    <img alt="Company Logo" class="h-10" src="https://placehold.co/50x50"/>
+    <span class="ml-2 text-2xl font-bold">
+     LN
+    </span>
+   </div>
+   <button aria-label="Menu" class="text-2xl focus:outline-none" onclick="toggleMenu()">
+    <i class="fas fa-bars">
+    </i>
+   </button>
+  </header>
+  <div class="hidden fixed top-16 left-0 right-0 bg-gray-800 p-4 z-40" id="menu">
+   <ul class="space-y-4">
+    <li>
+     <a class="text-white" href="#" onclick="loadSection('home')">
+      Home
+     </a>
+    </li>
+    <li>
+     <a class="text-white" href="#" onclick="loadSection('features')">
+      Features
+     </a>
+    </li>
+    <li>
+     <a class="text-white" href="#" onclick="loadSection('pricing')">
+      Pricing
+     </a>
+    </li>
+    <li>
+     <a class="text-white" href="#" onclick="loadSection('contact')">
+      Contact
+     </a>
+    </li>
+    <li class="user-only hidden">
+     <a class="text-white" href="#" onclick="loadSection('dashboard')">
+      Dashboard
+     </a>
+    </li>
+    <li class="user-only hidden">
+     <a class="text-white" href="#" onclick="loadSection('profile')">
+      Profile
+     </a>
+    </li>
+    <li class="user-only hidden">
+     <a class="text-white" href="#">
+      Settings
+     </a>
+     <ul class="ml-4 space-y-2">
+      <li>
+       <a class="text-white" href="#" onclick="loadSection('update-profile')">
+        Update Profile
+       </a>
+      </li>
+      <li>
+       <a class="text-white" href="#" onclick="loadSection('update-password')">
+        Update Password
+       </a>
+      </li>
+     </ul>
+    </li>
+    <li class="user-only hidden">
+     <a class="text-white" href="#" onclick="loadSection('raise-ticket')">
+      Raise a Ticket
+     </a>
+    </li>
+    <li>
+     <a class="text-white" href="#" onclick="loadSection('faq')">
+      FAQ
+     </a>
+    </li>
+    <li>
+     <a class="text-white" href="#" onclick="loadSection('privacy-policy')">
+      Privacy Policy
+     </a>
+    </li>
+    <li>
+     <a class="text-white" href="#" onclick="loadSection('about')">
+      About
+     </a>
+    </li>
+    <li class="guest-only">
+     <a class="text-white" href="#" onclick="loadAuthPage('login')">
+      Log In
+     </a>
+    </li>
+    <li class="guest-only">
+     <a class="text-white" href="#" onclick="loadAuthPage('signup')">
+      Sign Up
+     </a>
+    </li>
+   </ul>
+  </div>
+  <main class="text-center px-4 pt-20">
+   <div id="main-content">
+    <h1 class="text-3xl md:text-5xl font-bold text-green-500">
+     Low-Code Automation Platform
+    </h1>
+    <h2 class="text-xl md:text-3xl font-bold mt-2">
+     For Professionals
+    </h2>
+    <ul class="text-left mt-4 space-y-2">
+     <li class="flex items-start">
+      <i class="fas fa-check-square text-green-500 mt-1">
+      </i>
+      <span class="ml-2">
+       Stop overpaying for "operations" or "tasks" —
+       <strong>
+        pay 10x less for real processing time.
+       </strong>
+      </span>
+     </li>
+     <li class="flex items-start">
+      <i class="fas fa-check-square text-green-500 mt-1">
+      </i>
+      <span class="ml-2">
+       Build custom integrations without limits in minutes, not weeks.
+      </span>
+     </li>
+     <li class="flex items-start">
+      <i class="fas fa-check-square text-green-500 mt-1">
+      </i>
+      <span class="ml-2">
+       Use no-code or use custom code with AI copilot.
+      </span>
+     </li>
+     <li class="flex items-start">
+      <i class="fas fa-check-square text-green-500 mt-1">
+      </i>
+      <span class="ml-2">
+       Dozens of AI models available instantly.
+      </span>
+     </li>
+    </ul>
+    <div class="mt-6 space-x-4">
+     <button class="bg-green-500 text-white px-6 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-green-300">
+      Start Free Trial
+     </button>
+     <button class="border border-white text-white px-6 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-white">
+      View demo
+     </button>
+    </div>
+    <div class="mt-10">
+     <img alt="Are you a Make user? Let me briefly tell you about the benefits of Latenode." class="rounded-lg" src="https://placehold.co/800x400"/>
+    </div>
+   </div>
+  </main>
+  <section class="bg-white text-black py-10 px-4">
+   <div class="flex justify-between items-center mb-6">
+    <h3 class="text-xl md:text-2xl font-bold">
+     Automation Tips and Techniques You Can Use Today
+    </h3>
+    <a class="text-blue-500" href="#">
+     All articles
+    </a>
+   </div>
+   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-gray-100 p-4 rounded-lg">
+     <img alt="Low-Code Automations for Beginners" class="rounded-lg mb-4" src="https://placehold.co/400x200"/>
+     <h4 class="font-bold">
+      Low-Code Automations for Beginners
+     </h4>
+     <p>
+      Switch your focus from manual task execution to automating them in seconds
+     </p>
+    </div>
+    <div class="bg-gray-100 p-4 rounded-lg">
+     <img alt="Automating without API: Headless Browser on low-code platform Latenode" class="rounded-lg mb-4" src="https://placehold.co/400x200"/>
+     <h4 class="font-bold">
+      Automating without API: Headless Browser on low-code platform Latenode
+     </h4>
+    </div>
+    <div class="bg-gray-100 p-4 rounded-lg">
+     <img alt="Create Integration With Any App: Two Methods" class="rounded-lg mb-4" src="https://placehold.co/400x200"/>
+     <h4 class="font-bold">
+      Create Integration With Any App: Two Methods
+     </h4>
+    </div>
+    <div class="bg-gray-100 p-4 rounded-lg">
+     <img alt="JavaScript + AI: a Perfect Duo for Low-code Automations" class="rounded-lg mb-4" src="https://placehold.co/400x200"/>
+     <h4 class="font-bold">
+      JavaScript + AI: a Perfect Duo for Low-code Automations
+     </h4>
+    </div>
+   </div>
+  </section>
+  <footer class="bg-gray-800 text-white py-6 px-4">
+   <div class="container mx-auto text-center">
+    <p>
+     © 2023 Low-Code Automation Platform. All rights reserved.
+    </p>
+    <div class="mt-4 space-x-4">
+     <a class="text-white" href="#" onclick="loadSection('privacy-policy')">
+      Privacy Policy
+     </a>
+     <a class="text-white" href="#" onclick="loadSection('terms-of-service')">
+      Terms of Service
+     </a>
+     <a class="text-white" href="#" onclick="loadSection('contact')">
+      Contact Us
+     </a>
+    </div>
+   </div>
+  </footer>
+  <footer class="fixed bottom-4 right-4">
+   <button class="bg-purple-500 text-white px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-purple-300">
+    Help
+   </button>
+  </footer>
+  <!-- Sections for dynamic loading -->
+  <div class="hidden" id="dynamic-content">
+   <section class="hidden" id="home">
+    <h2 class="text-2xl font-bold">
+     Home
+    </h2>
+    <p>
+     Welcome to the Low-Code Automation Platform!
+    </p>
+   </section>
+   <section class="hidden" id="features">
+    <h2 class="text-2xl font-bold">
+     Features
+    </h2>
+    <p>
+     Discover the features of our platform.
+    </p>
+   </section>
+   <section class="hidden" id="pricing">
+    <h2 class="text-2xl font-bold">
+     Pricing
+    </h2>
+    <p>
+     Learn about our pricing plans.
+    </p>
+   </section>
+   <section class="hidden" id="contact">
+    <h2 class="text-2xl font-bold">
+     Contact
+    </h2>
+    <p>
+     Get in touch with us.
+    </p>
+   </section>
+   <section class="hidden" id="dashboard">
+    <h2 class="text-2xl font-bold">
+     Dashboard
+    </h2>
+    <p>
+     Welcome to your dashboard!
+    </p>
+   </section>
+   <section class="hidden" id="profile">
+    <h2 class="text-2xl font-bold">
+     Profile
+    </h2>
+    <p>
+     Manage your profile information here.
+    </p>
+   </section>
+   <section class="hidden" id="update-profile">
+    <h2 class="text-2xl font-bold">
+     Update Profile
+    </h2>
+    <p>
+     Update your profile details here.
+    </p>
+   </section>
+   <section class="hidden" id="update-password">
+    <h2 class="text-2xl font-bold">
+     Update Password
+    </h2>
+    <p>
+     Change your password here.
+    </p>
+   </section>
+   <section class="hidden" id="raise-ticket">
+    <h2 class="text-2xl font-bold">
+     Raise a Ticket
+    </h2>
+    <p>
+     Submit a support ticket here.
+    </p>
+   </section>
+   <section class="hidden" id="faq">
+    <h2 class="text-2xl font-bold">
+     FAQ
+    </h2>
+    <p>
+     Frequently Asked Questions
+    </p>
+   </section>
+   <section class="hidden" id="privacy-policy">
+    <h2 class="text-2xl font-bold">
+     Privacy Policy
+    </h2>
+    <p>
+     Read our privacy policy.
+    </p>
+   </section>
+   <section class="hidden" id="about">
+    <h2 class="text-2xl font-bold">
+     About
+    </h2>
+    <p>
+     Learn more about us.
+    </p>
+   </section>
+  </div>
+  <!-- Authentication Pages -->
+  <div class="hidden" id="auth-pages">
+   <section class="hidden" id="login">
+    <h2 class="text-2xl font-bold">
+     Log In
+    </h2>
+    <form class="mt-4">
+     <div class="mb-4">
+      <label class="block text-left" for="login-email">
+       Email
+      </label>
+      <input class="w-full p-2 rounded bg-gray-800 text-white" id="login-email" type="email"/>
+     </div>
+     <div class="mb-4">
+      <label class="block text-left" for="login-password">
+       Password
+      </label>
+      <input class="w-full p-2 rounded bg-gray-800 text-white" id="login-password" type="password"/>
+     </div>
+     <button class="bg-green-500 text-white px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-green-300" onclick="authenticateUser(event)">
+      Log In
+     </button>
+     <button class="bg-red-500 text-white px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-red-300 mt-2" onclick="googleLogin(event)">
+      Log In with Google
+     </button>
+    </form>
+    <p class="mt-4">
+     Don't have an account?
+     <a class="text-blue-500" href="#" onclick="loadAuthPage('signup')">
+      Sign Up
+     </a>
+    </p>
+   </section>
+   <section class="hidden" id="signup">
+    <h2 class="text-2xl font-bold">
+     Sign Up
+    </h2>
+    <form class="mt-4">
+     <div class="mb-4">
+      <label class="block text-left" for="signup-email">
+       Email
+      </label>
+      <input class="w-full p-2 rounded bg-gray-800 text-white" id="signup-email" type="email"/>
+     </div>
+     <div class="mb-4">
+      <label class="block text-left" for="signup-password">
+       Password
+      </label>
+      <input class="w-full p-2 rounded bg-gray-800 text-white" id="signup-password" type="password"/>
+     </div>
+     <button class="bg-green-500 text-white px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-green-300" onclick="registerUser(event)">
+      Sign Up
+     </button>
+     <button class="bg-red-500 text-white px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-red-300 mt-2" onclick="googleLogin(event)">
+      Sign Up with Google
+     </button>
+    </form>
+    <p class="mt-4">
+     Already have an account?
+     <a class="text-blue-500" href="#" onclick="loadAuthPage('login')">
+      Log In
+     </a>
+    </p>
+   </section>
+  </div>
+  <script>
+   function toggleMenu() {
+        const menu = document.getElementById('menu');
+        menu.classList.toggle('hidden');
+    }
+
+    function loadSection(sectionId) {
+        const sections = document.querySelectorAll('#dynamic-content > section');
+        sections.forEach(section => {
+            section.classList.add('hidden');
+        });
+        document.getElementById(sectionId).classList.remove('hidden');
+        document.getElementById('main-content').classList.add('hidden');
+    }
+
+    function loadAuthPage(pageId) {
+        const pages = document.querySelectorAll('#auth-pages > section');
+        pages.forEach(page => {
+            page.classList.add('hidden');
+        });
+        document.getElementById(pageId).classList.remove('hidden');
+        document.getElementById('main-content').classList.add('hidden');
+    }
+
+    function authenticateUser(event) {
+        event.preventDefault();
+        // Simulate authentication
+        const isAuthenticated = true;
+        if (isAuthenticated) {
+            const userOnlyElements = document.querySelectorAll('.user-only');
+            userOnlyElements.forEach(element => {
+                element.classList.remove('hidden');
+            });
+            const guestOnlyElements = document.querySelectorAll('.guest-only');
+            guestOnlyElements.forEach(element => {
+                element.classList.add('hidden');
+            });
+            loadSection('dashboard');
+        }
+    }
+
+    function registerUser(event) {
+        event.preventDefault();
+        // Simulate registration
+        const isAuthenticated = true;
+        if (isAuthenticated) {
+            const userOnlyElements = document.querySelectorAll('.user-only');
+            userOnlyElements.forEach(element => {
+                element.classList.remove('hidden');
+            });
+            const guestOnlyElements = document.querySelectorAll('.guest-only');
+            guestOnlyElements.forEach(element => {
+                element.classList.add('hidden');
+            });
+            loadSection('dashboard');
+        }
+    }
+
+    function googleLogin(event) {
+        event.preventDefault();
+        // Simulate Google login
+        const isAuthenticated = true;
+        if (isAuthenticated) {
+            const userOnlyElements = document.querySelectorAll('.user-only');
+            userOnlyElements.forEach(element => {
+                element.classList.remove('hidden');
+            });
+            const guestOnlyElements = document.querySelectorAll('.guest-only');
+            guestOnlyElements.forEach(element => {
+                element.classList.add('hidden');
+            });
+            loadSection('dashboard');
+        }
+    }
+
+    // Initial load
+    loadAuthPage('login');
+  </script>
+ </body>
+</html>

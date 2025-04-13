@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title> Blogging expert </title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    .glass {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .typing-indicator {
+      animation: blink 1.5s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 1; }
+    }
+    .editable-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-white font-sans">
+  <div class="min-h-screen flex flex-col items-center p-6">
+    <header class="w-full max-w-5xl mb-6">
+      <h1 class="text-4xl font-bold mb-2">  blogging Ai </h1>
+      <p class="text-gray-400">Generate SEO-optimized blog content with AI in seconds</p>
+    </header>
+
+    <main class="w-full max-w-5xl glass rounded-2xl p-6">
+      <div class="mb-4">
+        <label class="block text-sm mb-2">Blog Topic / Keywords</label>
+        <input id="topicInput" type="text" placeholder="e.g. AI in Healthcare" class="w-full p-3 rounded bg-gray-800 border border-gray-600 text-white">
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm mb-2">Select AI Model</label>
+        <select id="modelSelect" class="w-full p-3 rounded bg-gray-800 border border-gray-600 text-white">
+          <option value="gpt-4o">GPT-4o (Advanced)</option>
+          <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Faster)</option>
+          <option value="gpt-3o">GPT-3o-mini  (for easy tasks) </option>
+        </select>
+      </div>
+
+      <button onclick="generateContent()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded font-bold">
+        Generate Content
+      </button>
+
+      <div id="loading" class="mt-4 hidden text-blue-400 typing-indicator">Generating...</div>
+
+      <div id="resultModal" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-70 flex items-center justify-center z-50">
+        <div class="bg-gray-800 rounded-lg p-6 w-full max-w-3xl relative">
+          <button onclick="document.getElementById('resultModal').classList.add('hidden')" class="absolute top-2 right-4 text-white text-2xl">&times;</button>
+          <div id="result" class="whitespace-pre-wrap space-y-6 max-h-[70vh] overflow-y-auto"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const API_KEY = '6a91380587a74df6a786ce302cb74e0d';
+
+    async function generateContent() {
+      const topic = document.getElementById('topicInput').value.trim();
+      const model = document.getElementById('modelSelect').value;
+      const loading = document.getElementById('loading');
+      const result = document.getElementById('result');
+      const resultModal = document.getElementById('resultModal');
+
+      if (!topic) return alert('Please enter a topic or keyword.');
+
+      loading.classList.remove('hidden');
+      result.innerHTML = '';
+
+      try {
+        const response = await fetch("https://api.aimlapi.com/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: model,
+            messages: [
+              {
+                role: "system",
+                content: `You are a smart blogging Ai. Generate a viral and SEO-optimized blog post with:
+- A catchy and clickable title
+- Engaging and informative intro
+- In-depth content with bullet points or subheadings
+- A final conclusion with call to action
+- Popular and relevant YouTube video embed (via iframe) form any source you found or add random video id which from related to this topic ensure you using responsive techniques.
+- A compelling caption /negative caption for social media
+- Relevant and viral hashtags
+Tone should be friendly, human-like, and educational. Avoid overly robotic phrasing.
+- Use viral hashtags for blogpost founded on viral videos of social media like youtube,instagram e.g.
+- enhance your producticity by using   your own content genrated user. 
+- evolve yourself as a ultra pro better version of ai.
+- add some tips to hooks people. in {}.
+- format this blog post in tailwi nd css  in professional way to see a better eye catching blog.
+ - use unsplash  apis for carousel i give you example of unsplash of ai how use  like this   https://source.unsplash.com/random/?nature
+https://source.unsplash.com/random/?cats,dogs" 
+- in the  top feild  please   fill title of post not any type of other content in this field. 
+ 
+`
+              },
+              {
+                role: "user",
+                content: `Write a detailed, SEO-optimized blog article on: ${topic}`,
+              },
+            ],
+            max_tokens: 2048,
+            temperature: 0.85,
+            top_p: 1,
+            frequency_penalty: 0,
+            presence_penalty: 0.3,
+            stream: false,
+          }),
+        });
+
+        if (!response.ok) {
+          let message = `${response.status} ${response.statusText}`;
+          try {
+            const errorData = await response.json();
+            message = errorData?.error?.message || message;
+          } catch (e) {}
+          throw new Error(`API Error: ${message}`);
+        }
+
+        const data = await response.json();
+        const outputText = data?.choices?.[0]?.message?.content || 'No response text found.';
+
+        const editableContainer = document.createElement('div');
+
+        const headingContainer = document.createElement('div');
+        headingContainer.className = 'editable-heading mb-2';
+
+        const editableTitle = document.createElement('input');
+        editableTitle.className = 'text-xl font-bold bg-transparent border-b border-gray-600 text-white w-full p-1';
+        editableTitle.value = outputText.split("\n")[0] || "Generated Blog Title";
+        headingContainer.appendChild(editableTitle);
+
+        editableContainer.appendChild(headingContainer);
+
+        const textarea = document.createElement('textarea');
+        textarea.value = outputText;
+        textarea.className = 'w-full h-64 p-3 rounded bg-gray-900 text-white border border-gray-600 mb-4';
+        editableContainer.appendChild(textarea);
+
+        const buttonGroup = document.createElement('div');
+        buttonGroup.className = 'flex gap-2';
+
+        const copyBtn = document.createElement('button');
+        copyBtn.textContent = 'Copy';
+        copyBtn.className = 'bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded';
+        copyBtn.onclick = () => {
+          navigator.clipboard.writeText(`${editableTitle.value}\n\n${textarea.value}`);
+          alert('Copied to clipboard!');
+        };
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.className = 'bg-red-500 hover:bg-red-600 px-4 py-2 rounded';
+        deleteBtn.onclick = () => {
+          editableContainer.remove();
+        };
+
+        buttonGroup.appendChild(copyBtn);
+        buttonGroup.appendChild(deleteBtn);
+        editableContainer.appendChild(buttonGroup);
+
+        result.appendChild(editableContainer);
+        resultModal.classList.remove('hidden');
+
+        // Auto-download the content
+        const blogTitle = editableTitle.value.replace(/[^a-z0-9]/gi, '_').toLowerCase().slice(0, 40);
+        const blob = new Blob([textarea.value], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${blogTitle || 'blog_article'}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+      } catch (error) {
+        console.error('Generation error:', error);
+        result.innerHTML = `<p class="text-red-500">Error: ${error.message}. Please verify your API key and check your internet connection.</p>`;
+        resultModal.classList.remove('hidden');
+      } finally {
+        loading.classList.add('hidden');
+      }
+    }
+  </script>
+</body>
+</html>
