@@ -1,237 +1,269 @@
-<!DOCTYPE html>
+
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Kyro.ai Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+      rel="stylesheet"
+    />
 
-<head>
-  <meta charset="utf-8" />
-  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-  <title>Kyro.ai Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
-  
-  
-  <script>
-  // Add this at the top of your dashboard JS
-  document.addEventListener('DOMContentLoaded', protectDashboard);
-  
-  // Handle authenticated state
-  document.addEventListener('isAuthenticated', () => {
-    // Your dashboard initialization code here
-    console.log('isAuthenticated, loading dashboard...');
-  });
-  
-  // Example logout button
-  document.getElementById('logout-btn')?.addEventListener('click', logout);
-</script>
- 
+    <script>
+      // This function checks if the user is authenticated.
+      // If authenticated, dispatch a custom event and shows the dashboard.
+      // Otherwise, hide the dashboard and show the "not authenticated" modal.
+      function protectDashboard() {
+        // Simulate authentication check; change to true to simulate an authenticated user.
+        const isAuthenticated = false; // Set true if user is authenticated
 
+        if (isAuthenticated) {
+          // User is authenticated so dispatch the event and make sure dashboard is visible
+          document.dispatchEvent(new Event("isAuthenticated"));
+          document.getElementById("dashboard").classList.remove("hidden");
+        } else {
+          // User is NOT authenticated so hide dashboard and show modal popup
+          document.getElementById("dashboard").classList.add("hidden");
+          document.getElementById("auth-modal").classList.remove("hidden");
+        }
+      }
+      document.addEventListener("DOMContentLoaded", protectDashboard);
 
-  <style>
-    .floating-header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      background-color: white;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      transition: transform 0.3s ease;
-      transform: translateY(-100%);
-    }
-    
-    .floating-header.show {
-      transform: translateY(0);
-    }
-    
-    .dropdown {
-      position: relative;
-      display: inline-block;
-    }
-    
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      background-color: white;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      z-index: 1000;
-      right: 0;
-      min-width: 160px;
-    }
-    
-    .dropdown:hover .dropdown-content {
-      display: block;
-    }
-  </style>
-</head>
+      // Handle authenticated state event
+      document.addEventListener("isAuthenticated", () => {
+        // Any dashboard initialization code can be added here
+        console.log("isAuthenticated - loading dashboard...");
+      });
 
-<body class="bg-gray-100 font-sans">
-  <div class="floating-header p-4 flex justify-between items-center" id="floating-header">
-    <div class="flex items-center w-full justify-between">
-      <div class="flex items-center">
-        <img alt="Kyro.ai Logo" class="w-10 h-10" src="https://placehold.co/40x40" />
-        <span class="ml-2 text-xl font-bold text-purple-600">Kyro.ai</span>
-      </div>
-      <div class="relative dropdown md:hidden" id="auth-section">
-        <button class="text-gray-700">
-          <i class="fas fa-bars text-xl"></i>
-        </button>
-        <div class="dropdown-content rounded shadow-md bg-white right-0" id="user-menu-content">
+      // Example logout button event listener.
+      document.getElementById("logout-btn")?.addEventListener("click", function logout() {
+        // Add your logout logic here
+        console.log("User logged out");
+      });
+    </script>
+
+    <style>
+      .floating-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        background-color: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        transform: translateY(-100%);
+      }
+      .floating-header.show {
+        transform: translateY(0);
+      }
+      .dropdown {
+        position: relative;
+        display: inline-block;
+      }
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        right: 0;
+        min-width: 160px;
+      }
+      .dropdown:hover .dropdown-content {
+        display: block;
+      }
+    </style>
+  </head>
+
+  <body class="bg-gray-100 font-sans">
+    <!-- Floating header -->
+    <div
+      class="floating-header p-4 flex justify-between items-center"
+      id="floating-header"
+    >
+      <div class="flex items-center w-full justify-between">
+        <div class="flex items-center">
+          <img alt="Kyro.ai Logo" class="w-10 h-10" src="https://placehold.co/40x40" />
+          <span class="ml-2 text-xl font-bold text-purple-600">Kyro.ai</span>
         </div>
-      </div>
-      <div class="hidden md:flex items-center space-x-4" id="desktop-auth-section">
-        <div class="text-gray-700 font-medium">Credits: <span id="credit-count">10</span></div>
-        <div class="dropdown" id="desktop-user-dropdown">
-          <button class="text-gray-700">
-            <i class="fas fa-user-circle text-xl"></i>
-          </button>
-          <div class="dropdown-content rounded shadow-md bg-white w-40" id="desktop-user-menu-content">
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <div class="flex flex-col md:flex-row mt-20">
-    <div class="w-full md:w-64 bg-white shadow-md">
-      <nav class="mt-4 md:mt-10 px-4" id="menu">
-        <div class="relative mt-2">
-        </div>
-      </nav>
-    </div>
-    
-    <div class="flex-1 p-6">
-      <div class="mt-6 flex items-center justify-between">
-        <h2 class="text-lg font-semibold">Analytics overview</h2>
-        <div class="relative dropdown md:hidden">
+        <div class="relative dropdown md:hidden" id="auth-section">
           <button class="text-gray-700">
             <i class="fas fa-bars text-xl"></i>
           </button>
-          <div class="dropdown-content rounded shadow-md bg-white right-0">
-            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="/agents/Blog-writer-ai.html">Agents</a>
+          <div
+            class="dropdown-content rounded shadow-md bg-white right-0"
+            id="user-menu-content"
+          ></div>
+        </div>
+        <div class="hidden md:flex items-center space-x-4" id="desktop-auth-section">
+          <div class="text-gray-700 font-medium">
+            Credits: <span id="credit-count">10</span>
           </div>
-        </div>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-        <div class="bg-white p-4 rounded-lg shadow-md">
-          <p class="text-gray-600">1 of 5</p>
-          <p class="text-gray-400">Team Members</p>
-        </div>
-        <div class="bg-white p-4 rounded-lg shadow-md">
-          <p class="text-gray-600">13 of 10000</p>
-          <p class="text-gray-400">Total Agents</p>
-        </div>
-        <div class="bg-white p-4 rounded-lg shadow-md">
-          <p class="text-gray-600">41.3M of 30B</p>
-          <p class="text-gray-400">Words Stored</p>
-        </div>
-        <div class="bg-white p-4 rounded-lg shadow-md">
-          <p class="text-gray-600">321 of 400K</p>
-          <p class="text-gray-400">Queries</p>
-        </div>
-        <div class="bg-white p-4 rounded-lg shadow-md">
-          <p class="text-gray-600">1.89K of 3M</p>
-          <p class="text-gray-400">Documents Crawled</p>
-        </div>
-        <div class="bg-white p-4 rounded-lg shadow-md">
-          <p class="text-gray-600">40.62M of 900B</p>
-          <p class="text-gray-400">Words Processed</p>
-        </div>
-      </div>
-      
-      <div class="mt-6">
-        <h2 class="text-lg font-semibold">Resources</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-          <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
-            <i class="fas fa-book text-2xl text-gray-600"></i>
-            <span class="ml-2 text-gray-600">User Guides</span>
-          </div>
-          <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
-            <i class="fas fa-question-circle text-2xl text-gray-600"></i>
-            <span class="ml-2 text-gray-600">Ask Kyro</span>
-          </div>
-          <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
-            <i class="fas fa-code text-2xl text-gray-600"></i>
-            <span class="ml-2 text-gray-600">API</span>
+          <div class="dropdown" id="desktop-user-dropdown">
+            <button class="text-gray-700">
+              <i class="fas fa-user-circle text-xl"></i>
+            </button>
+            <div
+              class="dropdown-content rounded shadow-md bg-white w-40"
+              id="desktop-user-menu-content"
+            ></div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  
-  <script>
-    function toggleMoreMenu() {
-      const menu = document.getElementById("more-menu");
-      if (menu) {
-        menu.classList.toggle("hidden");
-      }
-    }
-    
-    window.addEventListener('scroll', function() {
-      let floatingHeader = document.getElementById('floating-header');
-      let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      if (scrollTop > 10) {
-        floatingHeader.classList.remove('show');
-      } else {
-        floatingHeader.classList.add('show');
-      }
-    });
-    
-    function renderAuthLinks() {
-      const authSection = document.getElementById("auth-section");
-      const userMenuContent = document.getElementById("user-menu-content");
-      const desktopAuthSection = document.getElementById("desktop-auth-section");
-      const desktopUserMenuContent = document.getElementById("desktop-user-menu-content");
-      
-      // Simulate authentication and verification (replace with actual checks)
-      const isAuthenticated = false; // Replace with your actual authentication check
-      const isVerified = false; // Replace with your actual verification check
-      
-      if (isAuthenticated && isVerified) {
-        // User is authenticated and verified, show user profile
-        userMenuContent.innerHTML = `
-          <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="#">Profile</a>
-          <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="#">Settings</a>
-          <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" id="logout-btn" href="#">Logout</a>
-        `;
-        desktopUserMenuContent.innerHTML = `
-          <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="#">Profile</a>
-          <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="#">Settings</a>
-          <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" id="logout-btn" href="/auth.html">Logout</a>
-        `;
-      } else {
-        // User is not authenticated or verified, show Sign Up and Login
-        userMenuContent.innerHTML = `
-          <a class="block px-4 py-2 hover:bg-purple-100 text-gray-70    0" href="/auth.html">signup</a>
-          <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="/auth.html">Login</a>
-        `;
-        desktopUserMenuContent.innerHTML = `
-          <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="/auth.html">Sign Up</a>
-          <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="/auth.html">Login</a>
-        `;
-        desktopAuthSection.innerHTML = `
-        <a  href="/auth.html">Sign Up</a>
-        <a  href="/auth.html">Login</a>
-        `;
-      }
-    }
-    
-    window.addEventListener('load', function() {
-      document.getElementById('floating-header').classList.add('show');
-      renderAuthLinks(); // Call the function on page load
-    });
-  </script>
-  
-  
-  
-  
 
-  
+    <!-- Dashboard content wrapper with id "dashboard" -->
+    <div id="dashboard" class="flex flex-col md:flex-row mt-20">
+      <div class="w-full md:w-64 bg-white shadow-md">
+        <nav class="mt-4 md:mt-10 px-4" id="menu">
+          <div class="relative mt-2"></div>
+        </nav>
+      </div>
 
-  
-</body>
+      <div class="flex-1 p-6">
+        <div class="mt-6 flex items-center justify-between">
+          <h2 class="text-lg font-semibold">Analytics overview</h2>
+          <div class="relative dropdown md:hidden">
+            <button class="text-gray-700">
+              <i class="fas fa-bars text-xl"></i>
+            </button>
+            <div class="dropdown-content rounded shadow-md bg-white right-0">
+              <a
+                class="block px-4 py-2 hover:bg-purple-100 text-gray-700"
+                href="/agents/Blog-writer-ai.html"
+                >Agents</a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+          <div class="bg-white p-4 rounded-lg shadow-md">
+            <p class="text-gray-600">1 of 5</p>
+            <p class="text-gray-400">Team Members</p>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow-md">
+            <p class="text-gray-600">13 of 10000</p>
+            <p class="text-gray-400">Total Agents</p>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow-md">
+            <p class="text-gray-600">41.3M of 30B</p>
+            <p class="text-gray-400">Words Stored</p>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow-md">
+            <p class="text-gray-600">321 of 400K</p>
+            <p class="text-gray-400">Queries</p>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow-md">
+            <p class="text-gray-600">1.89K of 3M</p>
+            <p class="text-gray-400">Documents Crawled</p>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow-md">
+            <p class="text-gray-600">40.62M of 900B</p>
+            <p class="text-gray-400">Words Processed</p>
+          </div>
+        </div>
 
+        <div class="mt-6">
+          <h2 class="text-lg font-semibold">Resources</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
+            <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+              <i class="fas fa-book text-2xl text-gray-600"></i>
+              <span class="ml-2 text-gray-600">User Guides</span>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+              <i class="fas fa-question-circle text-2xl text-gray-600"></i>
+              <span class="ml-2 text-gray-600">Ask Kyro</span>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+              <i class="fas fa-code text-2xl text-gray-600"></i>
+              <span class="ml-2 text-gray-600">API</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Not Authenticated Modal -->
+    <div
+      id="auth-modal"
+      class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden"
+    >
+      <div class="bg-white p-8 rounded shadow-lg text-center">
+        <p class="mb-4 text-gray-700">You are not authenticated.</p>
+        <a
+          href="/auth.html"
+          class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+          >Login</a
+        >
+      </div>
+    </div>
+
+    <script>
+      // Sample function to toggle additional menus
+      function toggleMoreMenu() {
+        const menu = document.getElementById("more-menu");
+        if (menu) {
+          menu.classList.toggle("hidden");
+        }
+      }
+
+      window.addEventListener("scroll", function () {
+        let floatingHeader = document.getElementById("floating-header");
+        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        if (scrollTop > 10) {
+          floatingHeader.classList.remove("show");
+        } else {
+          floatingHeader.classList.add("show");
+        }
+      });
+
+      function renderAuthLinks() {
+        const authSection = document.getElementById("auth-section");
+        const userMenuContent = document.getElementById("user-menu-content");
+        const desktopAuthSection = document.getElementById("desktop-auth-section");
+        const desktopUserMenuContent = document.getElementById("desktop-user-menu-content");
+
+        // Simulate authentication and verification (replace with actual checks)
+        // Here you can reuse your actual authentication values
+        const isAuthenticated = false; // Change as needed
+        const isVerified = false; // Change as needed
+
+        if (isAuthenticated && isVerified) {
+          // User is authenticated and verified, show user profile
+          userMenuContent.innerHTML = `
+            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="#">Profile</a>
+            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="#">Settings</a>
+            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" id="logout-btn" href="#">Logout</a>
+          `;
+          desktopUserMenuContent.innerHTML = `
+            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="#">Profile</a>
+            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="#">Settings</a>
+            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" id="logout-btn" href="/auth.html">Logout</a>
+          `;
+        } else {
+          // User is not authenticated/verified, show Sign Up and Login links
+          userMenuContent.innerHTML = `
+            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="/auth.html">Sign Up</a>
+            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="/auth.html">Login</a>
+          `;
+          desktopUserMenuContent.innerHTML = `
+            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="/auth.html">Sign Up</a>
+            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="/auth.html">Login</a>
+          `;
+          desktopAuthSection.innerHTML = `
+            <a href="/auth.html">Sign Up</a>
+            <a href="/auth.html">Login</a>
+          `;
+        }
+      }
+
+      window.addEventListener("load", function () {
+        document.getElementById("floating-header").classList.add("show");
+        renderAuthLinks(); // Call the function on page load
+      });
+    </script>
+  </body>
 </html>
-
-
-
-
 

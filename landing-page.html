@@ -3,7 +3,7 @@
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <title>
-   Low-Code Automation Platform
+   KYRO.AI
   </title>
   <script src="https://cdn.tailwindcss.com">
   </script>
@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
   <style>
    body {
-     font-family: 'Roboto', sans-serif;
+    font-family: 'Roboto', sans-serif;
    }
   </style>
  </head>
@@ -98,12 +98,12 @@
      </a>
     </li>
     <li class="guest-only">
-     <a class="text-white" href="#" onclick="loadAuthPage('login')">
+     <a class="text-white" href="/auth.html" >
       Log In
      </a>
     </li>
     <li class="guest-only">
-     <a class="text-white" href="#" onclick="loadAuthPage('signup')">
+     <a class="text-white" href="/auth.html" >
       Sign Up
      </a>
     </li>
@@ -250,142 +250,6 @@
     <p>
      Learn about our pricing plans.
     </p>
-   </section>
-   <section class="hidden" id="contact">
-    <h2 class="text-2xl font-bold">
-     Contact
-    </h2>
-    <p>
-     Get in touch with us.
-    </p>
-   </section>
-   <section class="hidden" id="dashboard">
-    <h2 class="text-2xl font-bold">
-     Dashboard
-    </h2>
-    <p>
-     Welcome to your dashboard!
-    </p>
-   </section>
-   <section class="hidden" id="profile">
-    <h2 class="text-2xl font-bold">
-     Profile
-    </h2>
-    <p>
-     Manage your profile information here.
-    </p>
-   </section>
-   <section class="hidden" id="update-profile">
-    <h2 class="text-2xl font-bold">
-     Update Profile
-    </h2>
-    <p>
-     Update your profile details here.
-    </p>
-   </section>
-   <section class="hidden" id="update-password">
-    <h2 class="text-2xl font-bold">
-     Update Password
-    </h2>
-    <p>
-     Change your password here.
-    </p>
-   </section>
-   <section class="hidden" id="raise-ticket">
-    <h2 class="text-2xl font-bold">
-     Raise a Ticket
-    </h2>
-    <p>
-     Submit a support ticket here.
-    </p>
-   </section>
-   <section class="hidden" id="faq">
-    <h2 class="text-2xl font-bold">
-     FAQ
-    </h2>
-    <p>
-     Frequently Asked Questions
-    </p>
-   </section>
-   <section class="hidden" id="privacy-policy">
-    <h2 class="text-2xl font-bold">
-     Privacy Policy
-    </h2>
-    <p>
-     Read our privacy policy.
-    </p>
-   </section>
-   <section class="hidden" id="about">
-    <h2 class="text-2xl font-bold">
-     About
-    </h2>
-    <p>
-     Learn more about us.
-    </p>
-   </section>
-  </div>
-  <!-- Authentication Pages -->
-  <div class="hidden" id="auth-pages">
-   <section class="hidden" id="login">
-    <h2 class="text-2xl font-bold">
-     Log In
-    </h2>
-    <form class="mt-4">
-     <div class="mb-4">
-      <label class="block text-left" for="login-email">
-       Email
-      </label>
-      <input class="w-full p-2 rounded bg-gray-800 text-white" id="login-email" type="email"/>
-     </div>
-     <div class="mb-4">
-      <label class="block text-left" for="login-password">
-       Password
-      </label>
-      <input class="w-full p-2 rounded bg-gray-800 text-white" id="login-password" type="password"/>
-     </div>
-     <button class="bg-green-500 text-white px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-green-300" onclick="authenticateUser(event)">
-      Log In
-     </button>
-     <button class="bg-red-500 text-white px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-red-300 mt-2" onclick="googleLogin(event)">
-      Log In with Google
-     </button>
-    </form>
-    <p class="mt-4">
-     Don't have an account?
-     <a class="text-blue-500" href="#" onclick="loadAuthPage('signup')">
-      Sign Up
-     </a>
-    </p>
-   </section>
-   <section class="hidden" id="signup">
-    <h2 class="text-2xl font-bold">
-     Sign Up
-    </h2>
-    <form class="mt-4">
-     <div class="mb-4">
-      <label class="block text-left" for="signup-email">
-       Email
-      </label>
-      <input class="w-full p-2 rounded bg-gray-800 text-white" id="signup-email" type="email"/>
-     </div>
-     <div class="mb-4">
-      <label class="block text-left" for="signup-password">
-       Password
-      </label>
-      <input class="w-full p-2 rounded bg-gray-800 text-white" id="signup-password" type="password"/>
-     </div>
-     <button class="bg-green-500 text-white px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-green-300" onclick="registerUser(event)">
-      Sign Up
-     </button>
-     <button class="bg-red-500 text-white px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-red-300 mt-2" onclick="googleLogin(event)">
-      Sign Up with Google
-     </button>
-    </form>
-    <p class="mt-4">
-     Already have an account?
-     <a class="text-blue-500" href="#" onclick="loadAuthPage('login')">
-      Log In
-     </a>
     </p>
    </section>
   </div>
@@ -403,69 +267,7 @@
         document.getElementById(sectionId).classList.remove('hidden');
         document.getElementById('main-content').classList.add('hidden');
     }
-
-    function loadAuthPage(pageId) {
-        const pages = document.querySelectorAll('#auth-pages > section');
-        pages.forEach(page => {
-            page.classList.add('hidden');
-        });
-        document.getElementById(pageId).classList.remove('hidden');
-        document.getElementById('main-content').classList.add('hidden');
-    }
-
-    function authenticateUser(event) {
-        event.preventDefault();
-        // Simulate authentication
-        const isAuthenticated = true;
-        if (isAuthenticated) {
-            const userOnlyElements = document.querySelectorAll('.user-only');
-            userOnlyElements.forEach(element => {
-                element.classList.remove('hidden');
-            });
-            const guestOnlyElements = document.querySelectorAll('.guest-only');
-            guestOnlyElements.forEach(element => {
-                element.classList.add('hidden');
-            });
-            loadSection('dashboard');
-        }
-    }
-
-    function registerUser(event) {
-        event.preventDefault();
-        // Simulate registration
-        const isAuthenticated = true;
-        if (isAuthenticated) {
-            const userOnlyElements = document.querySelectorAll('.user-only');
-            userOnlyElements.forEach(element => {
-                element.classList.remove('hidden');
-            });
-            const guestOnlyElements = document.querySelectorAll('.guest-only');
-            guestOnlyElements.forEach(element => {
-                element.classList.add('hidden');
-            });
-            loadSection('dashboard');
-        }
-    }
-
-    function googleLogin(event) {
-        event.preventDefault();
-        // Simulate Google login
-        const isAuthenticated = true;
-        if (isAuthenticated) {
-            const userOnlyElements = document.querySelectorAll('.user-only');
-            userOnlyElements.forEach(element => {
-                element.classList.remove('hidden');
-            });
-            const guestOnlyElements = document.querySelectorAll('.guest-only');
-            guestOnlyElements.forEach(element => {
-                element.classList.add('hidden');
-            });
-            loadSection('dashboard');
-        }
-    }
-
-    // Initial load
-    loadAuthPage('login');
   </script>
  </body>
 </html>
+    
