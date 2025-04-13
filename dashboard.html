@@ -86,7 +86,12 @@
     <div id="dashboard" class="flex flex-col md:flex-row mt-20">
       <div class="w-full md:w-64 bg-white shadow-md">
         <nav class="mt-4 md:mt-10 px-4" id="menu">
-          <div class="relative mt-2"></div>
+          <div class="relative mt-2">
+            
+            
+            
+            <p class="px-4 py-2 text-gray-700">Welcome, ${user.name}</p>
+          </div>
         </nav>
       </div>
 
@@ -189,9 +194,16 @@
 
       function renderAuthLinks() {
         const authSection = document.getElementById("auth-section");
+       
+       
+     //  edited
+       
+        const user = JSON.parse(sessionStorage.getItem("user"));
+
         const userMenuContent = document.getElementById("user-menu-content");
         const desktopAuthSection = document.getElementById("desktop-auth-section");
         const desktopUserMenuContent = document.getElementById("desktop-user-menu-content");
+
 
         // Simulate authentication and verification (replace with actual checks)
         // Here you can reuse your actual authentication values
@@ -215,7 +227,9 @@
           userMenuContent.innerHTML = `
             <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="/auth.html">Sign Up</a>
             <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="/auth.html">Login</a>
-          `;
+        
+        <button id="logout-btn">Logout</button>
+  `;
           desktopUserMenuContent.innerHTML = `
             <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="/auth.html">Sign Up</a>
             <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="/auth.html">Login</a>
@@ -275,7 +289,25 @@
     window.location.reload(); // or redirect to login page
   });
 </script>
+<script>
+  // Agar user session me nahi hai to redirect to login
+  if (!sessionStorage.getItem("user")) {
+    window.location.href = "auth.html";
+  }
+</script>
+⇝<script>
+  // Logout ka function
+  document.getElementById("logout-btn")?.addEventListener("click", function () {
+    sessionStorage.removeItem("user"); // User session hatao
+    window.location.href = "auth.html"; // Login page pe redirect karo
+  });
+</script>
 
   </body>
 </html>
+
+
+ And use user.name, user.email, etc., inside the renderAuthLinks() if you want to personalize the dropdown like:<p class="px-4 py-2 text-gray-700">Welcome, ${user.name}</p>
+const user = JSON.parse(sessionStorage.getItem("user"));
+
 
