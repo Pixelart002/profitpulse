@@ -56,7 +56,7 @@
           <img alt="Kyro.ai Logo" class="w-10 h-10" src="https://placehold.co/40x40" />
           <span class="ml-2 text-xl font-bold text-purple-600">Kyro.ai</span>
         </div>
-        <div class="relative dropdown md:hidden" id="auth-section">
+        <div class="relative dropdown md:visible" id="auth-section">
           <button class="text-gray-700">
             <i class="fas fa-bars text-xl"></i>
           </button>
@@ -90,7 +90,8 @@
             
             
             
-            <p class="px-4 py-2 text-gray-700">Welcome, ${user.name}</p>
+            <p class="px-4 py-2 text-gray-700" onload="JSON.parse(sessionStorage.getItem("user"));
+">Welcome, ${user.name}</p>
           </div>
         </nav>
       </div>
@@ -215,7 +216,7 @@
           userMenuContent.innerHTML = `
             <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="#">Profile</a>
             <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="#">Settings</a>
-            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" id="logout-btn" href="#">Logout</a>
+            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" id="logout-btn" href="auth.html">Logout</a>
           `;
           desktopUserMenuContent.innerHTML = `
             <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="#">Profile</a>
