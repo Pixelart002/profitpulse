@@ -10,39 +10,7 @@
       rel="stylesheet"
     />
 
-    <script>
-      // This function checks if the user is authenticated.
-      // If authenticated, dispatch a custom event and shows the dashboard.
-      // Otherwise, hide the dashboard and show the "not authenticated" modal.
-      function protectDashboard() {
-        // Simulate authentication check; change to true to simulate an authenticated user.
-        const isAuthenticated = false; // Set true if user is authenticated
-
-        if (isAuthenticated) {
-          // User is authenticated so dispatch the event and make sure dashboard is visible
-          document.dispatchEvent(new Event("isAuthenticated"));
-          document.getElementById("dashboard").classList.remove("hidden");
-        } else {
-          // User is NOT authenticated so hide dashboard and show modal popup
-          document.getElementById("dashboard").classList.add("hidden");
-          document.getElementById("auth-modal").classList.remove("hidden");
-        }
-      }
-      document.addEventListener("DOMContentLoaded", protectDashboard);
-
-      // Handle authenticated state event
-      document.addEventListener("isAuthenticated", () => {
-        // Any dashboard initialization code can be added here
-        console.log("isAuthenticated - loading dashboard...");
-      });
-
-      // Example logout button event listener.
-      document.getElementById("logout-btn")?.addEventListener("click", function logout() {
-        // Add your logout logic here
-        console.log("User logged out");
-      });
-    </script>
-
+   
     <style>
       .floating-header {
         position: fixed;
@@ -264,6 +232,50 @@
         renderAuthLinks(); // Call the function on page load
       });
     </script>
+    
+    
+    
+    
+    
+    
+    
+    
+    <div id="dashboard" class="hidden">
+  <!-- Your dashboard content -->
+  <button id="logout-btn">Logout</button>
+</div>
+
+<div id="auth-modal" class="hidden">
+  <p>You are not authenticated. Please log in.</p>
+  <a href="/index.html">Go to Login</a>
+</div>
+<script>
+  function protectDashboard() {
+    const userData = sessionStorage.getItem("user");
+    const isAuthenticated = userData !== null;
+
+    if (isAuthenticated) {
+      document.dispatchEvent(new Event("isAuthenticated"));
+      document.getElementById("dashboard").classList.remove("hidden");
+      document.getElementById("auth-modal").classList.add("hidden");
+    } else {
+      document.getElementById("dashboard").classList.add("hidden");
+      document.getElementById("auth-modal").classList.remove("hidden");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", protectDashboard);
+
+  document.addEventListener("isAuthenticated", () => {
+    console.log("User is authenticated - loading dashboard...");
+  });
+
+  document.getElementById("logout-btn")?.addEventListener("click", function logout() {
+    sessionStorage.removeItem("user");
+    window.location.reload(); // or redirect to login page
+  });
+</script>
+
   </body>
 </html>
 

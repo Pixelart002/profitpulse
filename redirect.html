@@ -1,30 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+  
   <meta charset="utf-8" />
+  
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>Redirecting...</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // Check if user is authenticated by looking for user data in sessionStorage
-    function isUserAuthenticated() {
-      const user = sessionStorage.getItem("user");
-      return !!user; // Returns true if user exists, false otherwise
-    }
+    // Supabase client initialization
+    const supabase = window.supabase.createClient(
+      'https://wqxlakambzrebifqszbo.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxeGxha2FtYnpyZWJpZnFzemJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxOTAzMjcsImV4cCI6MjA1OTc2NjMyN30.kIEpEt84s5sRAPmaN7Vb2oQCnXIHnKVxPFXD5gDqNuQ'
+    );
 
-    function protectDashboard() {
-      if (isUserAuthenticated()) {
-        // If authenticated, redirect to the dashboard
+    // Function to protect the dashboard by checking authentication
+    async function protectDashboard() {
+      // 1. Supabase session check
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session && session.user) {
+        // Valid Supabase session, allow access to dashboard
+        // Agar session valid hai toh dashboard par bheje
         window.location.href = "/dashboard.html";
       } else {
-        // If not authenticated, redirect to the authentication page
-        window.location.href = "auth.html";
+        // 2. Fallback: sessionStorage se user check karna
+        const user = sessionStorage.getItem("user");
+        if (user) {
+          // If a user is found in sessionStorage, redirect to dashboard
+          // Agar sessionStorage mein user milta hai toh dashboard par bheje
+          window.location.href = "/dashboard.html";
+        } else {
+          // Not authenticated, redirect to authentication page
+          // Agar authenticated nahi hai, toh auth page par bheje
+          window.location.href = "auth.html";
+        }
       }
     }
 
+    // Call protectDashboard function when DOM content is fully loaded
     document.addEventListener("DOMContentLoaded", protectDashboard);
   </script>
 </head>
+
 <body>
-  <p>Redirecting...</p>
+    <p>Redirecting...</p>
 </body>
+
 </html>
