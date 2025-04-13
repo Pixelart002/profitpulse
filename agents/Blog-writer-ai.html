@@ -44,7 +44,9 @@
         <select id="modelSelect" class="w-full p-3 rounded bg-gray-800 border border-gray-600 text-white">
           <option value="gpt-4o">GPT-4o (Advanced)</option>
           <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Faster)</option>
-          <option value="gpt-3o">GPT-3o-mini  (for easy tasks) </option>
+
+          <option value="deepseek/deepseek-r1">  deepseekr1(for premium response) </option>
+
         </select>
       </div>
 
@@ -52,7 +54,7 @@
         Generate Content
       </button>
 
-      <div id="loading" class="mt-4 hidden text-blue-400 typing-indicator">Generating...</div>
+      <div id="loading" class="mt-4 hidden text-blue-400 typing-indicator"> Cooking your stuff...</div>
 
       <div id="resultModal" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-70 flex items-center justify-center z-50">
         <div class="bg-gray-800 rounded-lg p-6 w-full max-w-3xl relative">
@@ -64,7 +66,7 @@
   </div>
 
   <script>
-    const API_KEY = '6a91380587a74df6a786ce302cb74e0d';
+    const API_KEY = '632ea6c7c93d420a93f04df682cada20';
 
     async function generateContent() {
       const topic = document.getElementById('topicInput').value.trim();
@@ -91,21 +93,22 @@
               {
                 role: "system",
                 content: `You are a smart blogging Ai. Generate a viral and SEO-optimized blog post with:
-- A catchy and clickable title
+- A catchy and clickable title in title field.
 - Engaging and informative intro
 - In-depth content with bullet points or subheadings
 - A final conclusion with call to action
-- Popular and relevant YouTube video embed (via iframe) form any source you found or add random video id which from related to this topic ensure you using responsive techniques.
+- Popular and relevant YouTube video embed (via iframe) form any source you found or add random& change video id after new generation video id .
 - A compelling caption /negative caption for social media
 - Relevant and viral hashtags
 Tone should be friendly, human-like, and educational. Avoid overly robotic phrasing.
 - Use viral hashtags for blogpost founded on viral videos of social media like youtube,instagram e.g.
 - enhance your producticity by using   your own content genrated user. 
 - evolve yourself as a ultra pro better version of ai.
-- add some tips to hooks people. in {}.
-- format this blog post in tailwi nd css  in professional way to see a better eye catching blog.
- - use unsplash  apis for carousel i give you example of unsplash of ai how use  like this   https://source.unsplash.com/random/?nature
-https://source.unsplash.com/random/?cats,dogs" 
+- add some  hooks in {}.
+- add links of genrated content source.
+- add their socials. 
+- format this blog post into html with tailwi nd   in professional way to see a better eye catching blog.
+
 - in the  top feild  please   fill title of post not any type of other content in this field. 
  
 `
@@ -196,6 +199,43 @@ https://source.unsplash.com/random/?cats,dogs"
         loading.classList.add('hidden');
       }
     }
+    
+    
+    
+     const apiKey = "<YOUR_AIMLAPI_KEY>"; // Replace with your actual API key
+const url = "https://api.aimlapi.com/v1/chat/completions";
+
+const data = {
+    model: "deepseek/deepseek-r1",
+    messages: [
+        {
+            role: "user",
+            content: "Hello" // Replace with your question
+        }
+    ]
+};
+
+fetch(url, {
+    method: 'POST',
+    headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+})
+.then(response => {
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+})
+.then(responseData => {
+    console.log(responseData);
+})
+.catch(error => {
+    console.error("Error:", error);
+});
+
   </script>
 </body>
 </html>

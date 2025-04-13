@@ -1,24 +1,22 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta content="width=device-width, initial-scale=1.0" name="viewport" />
   <title>Redirecting...</title>
   <script>
-    // Simulate actual authentication check.
-    // Replace this with your real authentication logic.
+    // Check if user is authenticated by looking for user data in sessionStorage
     function isUserAuthenticated() {
-      // For example, check for a valid session or token.
-      // return true if authenticated, false otherwise.
-      // Here, it's set to false for demonstration.
-      return false;
+      const user = sessionStorage.getItem("user");
+      return !!user; // Returns true if user exists, false otherwise
     }
 
     function protectDashboard() {
       if (isUserAuthenticated()) {
-        // If authenticated, redirect to the dashboard (index.html)
+        // If authenticated, redirect to the dashboard
         window.location.href = "index.html";
       } else {
-        // If not authenticated, redirect to the authentication page (auth.html)
+        // If not authenticated, redirect to the authentication page
         window.location.href = "auth.html";
       }
     }
