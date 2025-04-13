@@ -90,8 +90,7 @@
             
             
             
-            <p class="px-4 py-2 text-gray-700" onload="JSON.parse(sessionStorage.getItem("user"));
-">Welcome, ${user.name}</p>
+            <p class="px-4 py-2 text-gray-700" >Welcome, ${user.name} </p>
           </div>
         </nav>
       </div>
@@ -216,7 +215,7 @@
           userMenuContent.innerHTML = `
             <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="#">Profile</a>
             <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="#">Settings</a>
-            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" id="logout-btn" href="auth.html">Logout</a>
+            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" id="logout-btn" href="/auth.html">Logout</a>
           `;
           desktopUserMenuContent.innerHTML = `
             <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="#">Profile</a>
@@ -229,7 +228,7 @@
             <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="/auth.html">Sign Up</a>
             <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="/auth.html">Login</a>
         
-        <button id="logout-btn">Logout</button>
+        <button id="logout-btn"    onclick="window.location.href="/auth.html"">Logout</button>
   `;
           desktopUserMenuContent.innerHTML = `
             <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="/auth.html">Sign Up</a>
@@ -257,7 +256,7 @@
     
     <div id="dashboard" class="hidden">
   <!-- Your dashboard content -->
-  <button id="logout-btn">Logout</button>
+  <button id="logout-btn" onclick="window.location.href="/auth.html"">Logout</button>
 </div>
 
 <div id="auth-modal" class="hidden">
