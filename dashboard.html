@@ -1,313 +1,212 @@
-
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kyro.ai Dashboard</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
       rel="stylesheet"
     />
+    <!-- Supabase JS Client (replace with latest version if needed) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
-   
     <style>
-      .floating-header {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 1000;
+      /* Custom CSS for fixed header and layout adjustments */
+      header {
         background-color: white;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease;
-        transform: translateY(-100%);
-      }
-      .floating-header.show {
-        transform: translateY(0);
-      }
-      .dropdown {
-        position: relative;
-        display: inline-block;
-      }
-      .dropdown-content {
-        display: none;
-        position: absolute;
-        background-color: white;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        z-index: 1000;
-        right: 0;
-        min-width: 160px;
-      }
-      .dropdown:hover .dropdown-content {
-        display: block;
       }
     </style>
   </head>
 
   <body class="bg-gray-100 font-sans">
-    <!-- Floating header -->
-    <div
-      class="floating-header p-4 flex justify-between items-center"
-      id="floating-header"
-    >
-      <div class="flex items-center w-full justify-between">
+    <!-- Header Section with new menus -->
+    <header class="fixed top-0 left-0 right-0 z-50 shadow-md">
+      <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+        <!-- Logo -->
         <div class="flex items-center">
-          <img alt="Kyro.ai Logo" class="w-10 h-10" src="https://placehold.co/40x40" />
+          <img
+            src="https://placehold.co/40x40"
+            alt="Kyro.ai Logo"
+            class="w-10 h-10"
+          />
           <span class="ml-2 text-xl font-bold text-purple-600">Kyro.ai</span>
         </div>
-        <div class="relative dropdown md:visible" id="auth-section">
-          <button class="text-gray-700">
-            <i class="fas fa-bars text-xl"></i>
-          </button>
-          <div
-            class="dropdown-content rounded shadow-md bg-white right-0"
-            id="user-menu-content"
-          ></div>
-        </div>
-        <div class="hidden md:flex items-center space-x-4" id="desktop-auth-section">
-          <div class="text-gray-700 font-medium">
-            Credits: <span id="credit-count">10</span>
-          </div>
-          <div class="dropdown" id="desktop-user-dropdown">
-            <button class="text-gray-700">
-              <i class="fas fa-user-circle text-xl"></i>
-            </button>
-            <div
-              class="dropdown-content rounded shadow-md bg-white w-40"
-              id="desktop-user-menu-content"
-            ></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Dashboard content wrapper with id "dashboard" -->
-    <div id="dashboard" class="flex flex-col md:flex-row mt-20">
-      <div class="w-full md:w-64 bg-white shadow-md">
-        <nav class="mt-4 md:mt-10 px-4" id="menu">
-          <div class="relative mt-2">
-            
-            
-            
-            <p class="px-4 py-2 text-gray-700" >Welcome, ${user.name} </p>
-          </div>
+        <!-- Navigation Menus -->
+        <nav class="flex space-x-6">
+          <a href="#" class="text-gray-700 hover:text-purple-600"
+            >Dashboard</a
+          >
+          <a href="#" class="text-gray-700 hover:text-purple-600">Profile</a>
+          <a href="#" class="text-gray-700 hover:text-purple-600">Agents</a>
+          <a href="#" class="text-gray-700 hover:text-purple-600"
+            >Resources</a
+          >
         </nav>
+        <!-- Authentication Section (userinfo and logout btn) -->
+        <div id="auth-section" class="flex items-center space-x-4">
+          <!-- Ye span me user email ya name show hoga -->
+          <span id="user-info" class="text-gray-700"></span>
+          <!-- Logout button, by default hidden -->
+          <button
+            id="logout-btn"
+            class="px-3 py-1 bg-red-500 text-white rounded hidden"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Dashboard Content -->
+    <main class="pt-20 container mx-auto px-4">
+      <!-- Dashboard Header -->
+      <div class="mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
       </div>
 
-      <div class="flex-1 p-6">
-        <div class="mt-6 flex items-center justify-between">
-          <h2 class="text-lg font-semibold">Analytics overview</h2>
-          <div class="relative dropdown md:hidden">
-            <button class="text-gray-700">
-              <i class="fas fa-bars text-xl"></i>
-            </button>
-            <div class="dropdown-content rounded shadow-md bg-white right-0">
-              <a
-                class="block px-4 py-2 hover:bg-purple-100 text-gray-700"
-                href="/agents/Blog-writer-ai.html"
-                >Agents</a
-              >
+      <!-- New UI Menus / Sections -->
+      <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Analytics Overview Card -->
+        <div class="bg-white p-6 rounded shadow-lg">
+          <h2 class="text-xl font-semibold mb-4">Analytics Overview</h2>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-gray-100 p-4 rounded">
+              <p class="text-gray-600">Team Members:</p>
+              <p class="text-gray-800 font-bold">1 of 5</p>
+            </div>
+            <div class="bg-gray-100 p-4 rounded">
+              <p class="text-gray-600">Total Agents:</p>
+              <p class="text-gray-800 font-bold">13 of 10000</p>
+            </div>
+            <div class="bg-gray-100 p-4 rounded">
+              <p class="text-gray-600">Words Stored:</p>
+              <p class="text-gray-800 font-bold">41.3M of 30B</p>
+            </div>
+            <div class="bg-gray-100 p-4 rounded">
+              <p class="text-gray-600">Queries:</p>
+              <p class="text-gray-800 font-bold">321 of 400K</p>
             </div>
           </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-          <div class="bg-white p-4 rounded-lg shadow-md">
-            <p class="text-gray-600">1 of 5</p>
-            <p class="text-gray-400">Team Members</p>
-          </div>
-          <div class="bg-white p-4 rounded-lg shadow-md">
-            <p class="text-gray-600">13 of 10000</p>
-            <p class="text-gray-400">Total Agents</p>
-          </div>
-          <div class="bg-white p-4 rounded-lg shadow-md">
-            <p class="text-gray-600">41.3M of 30B</p>
-            <p class="text-gray-400">Words Stored</p>
-          </div>
-          <div class="bg-white p-4 rounded-lg shadow-md">
-            <p class="text-gray-600">321 of 400K</p>
-            <p class="text-gray-400">Queries</p>
-          </div>
-          <div class="bg-white p-4 rounded-lg shadow-md">
-            <p class="text-gray-600">1.89K of 3M</p>
-            <p class="text-gray-400">Documents Crawled</p>
-          </div>
-          <div class="bg-white p-4 rounded-lg shadow-md">
-            <p class="text-gray-600">40.62M of 900B</p>
-            <p class="text-gray-400">Words Processed</p>
-          </div>
-        </div>
 
-        <div class="mt-6">
-          <h2 class="text-lg font-semibold">Resources</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-4">
-            <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+        <!-- Resources Card -->
+        <div class="bg-white p-6 rounded shadow-lg">
+          <h2 class="text-xl font-semibold mb-4">Resource Center</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex items-center space-x-2">
               <i class="fas fa-book text-2xl text-gray-600"></i>
-              <span class="ml-2 text-gray-600">User Guides</span>
+              <span class="text-gray-700">User Guides</span>
             </div>
-            <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+            <div class="flex items-center space-x-2">
               <i class="fas fa-question-circle text-2xl text-gray-600"></i>
-              <span class="ml-2 text-gray-600">Ask Kyro</span>
+              <span class="text-gray-700">Ask Kyro</span>
             </div>
-            <div class="bg-white p-4 rounded-lg shadow-md flex items-center justify-center">
+            <div class="flex items-center space-x-2">
               <i class="fas fa-code text-2xl text-gray-600"></i>
-              <span class="ml-2 text-gray-600">API</span>
+              <span class="text-gray-700">API</span>
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
 
-    <!-- Not Authenticated Modal -->
+    <!-- Auth Modal: Jab user authenticated nahi hai ya logout hone ke baad message dikhaye -->
     <div
       id="auth-modal"
       class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden"
     >
       <div class="bg-white p-8 rounded shadow-lg text-center">
-        <p class="mb-4 text-gray-700">You are not authenticated.</p>
-        <a
-          href="/auth.html"
-          class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
-          >Login</a
-        >
+        <p class="mb-4 text-gray-700">
+          Aap authenticated nahi hain ya logout ho chuke hain.
+        </p>
+        <p class="mb-4 text-green-600" id="redirect-msg">
+          Redirecting to login...
+        </p>
       </div>
     </div>
 
     <script>
-      // Sample function to toggle additional menus
-      function toggleMoreMenu() {
-        const menu = document.getElementById("more-menu");
-        if (menu) {
-          menu.classList.toggle("hidden");
+      // Supabase client initialize kar rahe hain (SUPABASE_URL aur SUPABASE_KEY ko replace karein)
+      const SUPABASE_URL = "https://your-supabase-url.supabase.co";
+      const SUPABASE_KEY = "your-public-anon-key";
+      const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+      // Function: User ke session ko check karta hai
+      async function checkUserSession() {
+        // Supabase se current session lena
+        const { data: { session }, error } = await supabaseClient.auth.getSession();
+        if (error) {
+          console.error("Session fetch karte waqt error:", error);
+          return null;
+        }
+        console.log("Session details:", session); // Debug log in Hinglish
+        return session;
+      }
+
+      // Function: Header me user detail aur logout button display karta hai
+      async function renderAuthUI() {
+        const session = await checkUserSession();
+        const userInfoSpan = document.getElementById("user-info");
+        const logoutBtn = document.getElementById("logout-btn");
+
+        if (session && session.user) {
+          // Agar session valid hai, to user ka email ya name display karen
+          const user = session.user;
+          userInfoSpan.textContent = `Welcome, ${user.email}`;
+          logoutBtn.classList.remove("hidden");
+        } else {
+          // Agar session nahi hai, modal dikhao aur redirect karo
+          showAuthModal();
         }
       }
 
-      window.addEventListener("scroll", function () {
-        let floatingHeader = document.getElementById("floating-header");
-        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        if (scrollTop > 10) {
-          floatingHeader.classList.remove("show");
+      // Function: Modal show karta hai aur login page pe redirect karta hai
+      function showAuthModal() {
+        console.log("User authenticated nahi hai, modal dikha rahe hain");
+        const authModal = document.getElementById("auth-modal");
+        authModal.classList.remove("hidden");
+
+        // Redirect message update kar rahe hain
+        document.getElementById("redirect-msg").textContent =
+          "Redirecting to login page...";
+
+        // 3 seconds ke baad login page pe redirect
+        setTimeout(() => {
+          window.location.href = "redirect.html";
+        }, 3000);
+      }
+
+      // Function: Logout process, Supabase se signOut karta hai
+      async function logoutUser() {
+        console.log("Logout button click hua, signout process shuru kar rahe hain");
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) {
+          console.error("Logout ke dauran error:", error);
         } else {
-          floatingHeader.classList.add("show");
-        }
-      });
-
-      function renderAuthLinks() {
-        const authSection = document.getElementById("auth-section");
-       
-       
-     //  edited
-       
-        const user = JSON.parse(sessionStorage.getItem("user"));
-
-        const userMenuContent = document.getElementById("user-menu-content");
-        const desktopAuthSection = document.getElementById("desktop-auth-section");
-        const desktopUserMenuContent = document.getElementById("desktop-user-menu-content");
-
-
-        // Simulate authentication and verification (replace with actual checks)
-        // Here you can reuse your actual authentication values
-        const isAuthenticated = false; // Change as needed
-        const isVerified = false; // Change as needed
-
-        if (isAuthenticated && isVerified) {
-          // User is authenticated and verified, show user profile
-          userMenuContent.innerHTML = `
-            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="#">Profile</a>
-            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="#">Settings</a>
-            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" id="logout-btn" href="/auth.html">Logout</a>
-          `;
-          desktopUserMenuContent.innerHTML = `
-            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="#">Profile</a>
-            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="#">Settings</a>
-            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" id="logout-btn" href="/auth.html">Logout</a>
-          `;
-        } else {
-          // User is not authenticated/verified, show Sign Up and Login links
-          userMenuContent.innerHTML = `
-            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="/auth.html">Sign Up</a>
-            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="/auth.html">Login</a>
-        
-        <button id="logout-btn"    onclick="window.location.href="/auth.html"">Logout</button>
-  `;
-          desktopUserMenuContent.innerHTML = `
-            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="/auth.html">Sign Up</a>
-            <a class="block px-4 py-2 hover:bg-purple-100 text-gray-700" href="/auth.html">Login</a>
-          `;
-          desktopAuthSection.innerHTML = `
-            <a href="/auth.html">Sign Up</a>
-            <a href="/auth.html">Login</a>
-          `;
+          console.log("Logout successful, redirecting user...");
+          // Logout ke baad modal show karo with message
+          const authModal = document.getElementById("auth-modal");
+          authModal.classList.remove("hidden");
+          document.getElementById("redirect-msg").textContent =
+            "Logout successful! Redirecting...";
+          // 3 second baad login page pe redirect
+          setTimeout(() => {
+            window.location.href = "redirect.html";
+          }, 3000);
         }
       }
 
-      window.addEventListener("load", function () {
-        document.getElementById("floating-header").classList.add("show");
-        renderAuthLinks(); // Call the function on page load
+      // Event Listener: Logout button ka click event
+      document.getElementById("logout-btn").addEventListener("click", logoutUser);
+
+      // Page load hone pe authentication check karo aur UI render karo
+      document.addEventListener("DOMContentLoaded", () => {
+        console.log("Page load ho gaya, user authentication check kar rahe hain");
+        renderAuthUI();
       });
     </script>
-    
-    
-    
-    
-    
-    
-    
-    
-    <div id="dashboard" class="hidden">
-  <!-- Your dashboard content -->
-  <button id="logout-btn" onclick="window.location.href="/auth.html"">Logout</button>
-</div>
-
-<div id="auth-modal" class="hidden">
-  <p>You are not authenticated. Please log in.</p>
-  <a href="/index.html">Go to Login</a>
-</div>
-<script>
-  function protectDashboard() {
-    const userData = sessionStorage.getItem("user");
-    const isAuthenticated = userData !== null;
-
-    if (isAuthenticated) {
-      document.dispatchEvent(new Event("isAuthenticated"));
-      document.getElementById("dashboard").classList.remove("hidden");
-      document.getElementById("auth-modal").classList.add("hidden");
-    } else {
-      document.getElementById("dashboard").classList.add("hidden");
-      document.getElementById("auth-modal").classList.remove("hidden");
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", protectDashboard);
-
-  document.addEventListener("isAuthenticated", () => {
-    console.log("User is authenticated - loading dashboard...");
-  });
-
-  document.getElementById("logout-btn")?.addEventListener("click", function logout() {
-    sessionStorage.removeItem("user");
-    window.location.reload(); // or redirect to login page
-  });
-</script>
-<script>
-  // Agar user session me nahi hai to redirect to login
-  if (!sessionStorage.getItem("user")) {
-    window.location.href = "auth.html";
-  }
-</script>
-⇝<script>
-  // Logout ka function
-  document.getElementById("logout-btn")?.addEventListener("click", function () {
-    sessionStorage.removeItem("user"); // User session hatao
-    window.location.href = "auth.html"; // Login page pe redirect karo
-  });
-</script>
-
   </body>
 </html>
-
-
- And use user.name, user.email, etc., inside the renderAuthLinks() if you want to personalize the dropdown like:<p class="px-4 py-2 text-gray-700">Welcome, ${user.name}</p>
-const user = JSON.parse(sessionStorage.getItem("user"));
-
-
