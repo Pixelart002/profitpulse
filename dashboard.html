@@ -1,5 +1,6 @@
+<!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kyro.ai Dashboard</title>
@@ -7,206 +8,167 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome -->
     <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
-      rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+        rel="stylesheet"
     />
-    <!-- Supabase JS Client (replace with latest version if needed) -->
+    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
     <style>
-      /* Custom CSS for fixed header and layout adjustments */
-      header {
-        background-color: white;
-      }
-    </style>
-  </head>
+        header {
+            background-color: white;
+        }
 
-  <body class="bg-gray-100 font-sans">
-    <!-- Header Section with new menus -->
-    <header class="fixed top-0 left-0 right-0 z-50 shadow-md">
-      <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+        /* Disable desktop view */
+        @media (min-width: 768px) {
+            body {
+                display: none; /* Hide body for desktop view */
+            }
+        }
+        
+        .menu-hidden {
+            display: none;
+        }
+        
+        @media(min-width: 768px) {
+            .mobile-menu {
+                display: none;
+            }
+            
+            .desktop-menu {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 font-sans">
+<header class="fixed top-0 left-0 right-0 z-50 shadow-md">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
         <!-- Logo -->
         <div class="flex items-center">
-          <img
-            src="https://placehold.co/40x40"
-            alt="Kyro.ai Logo"
-            class="w-10 h-10"
-          />
-          <span class="ml-2 text-xl font-bold text-purple-600">Kyro.ai</span>
+            <img
+                src="https://placehold.co/40x40"
+                alt="Kyro.ai Logo"
+                class="w-10 h-10"
+            />
+            <span class="ml-2 text-xl font-bold text-purple-600">Kyro.ai</span>
         </div>
+        
+        <!-- Hamburger Menu -->
+        <button id="hamburger" class="md:hidden p-2 focus:outline-none">
+            <i class="fas fa-bars"></i>
+        </button>
+
         <!-- Navigation Menus -->
-        <nav class="flex space-x-6">
-          <a href="#" class="text-gray-700 hover:text-purple-600"
-            >Dashboard</a
-          >
-          <a href="#" class="text-gray-700 hover:text-purple-600">Profile</a>
-          <a href="#" class="text-gray-700 hover:text-purple-600">Agents</a>
-          <a href="#" class="text-gray-700 hover:text-purple-600"
-            >Resources</a
-          >
+        <nav id="nav-menu" class="mobile-menu flex-col absolute top-full left-0 bg-white border-t border-gray-200 hidden md:flex md:flex-row md:space-x-6 md:bg-transparent md:border-none">
+            <a href="#" class="text-gray-700 hover:text-purple-600">Dashboard</a>
+            <a id="profile-link" href="#" class="text-gray-700 hover:text-purple-600 hidden">Profile</a>
+            <a href="#" class="text-gray-700 hover:text-purple-600">Agents</a>
+            <a href="#" class="text-gray-700 hover:text-purple-600">Resources</a>
         </nav>
-        <!-- Authentication Section (userinfo and logout btn) -->
-        <div id="auth-section" class="flex items-center space-x-4">
-          <!-- Ye span me user email ya name show hoga -->
-          <span id="user-info" class="text-gray-700"></span>
-          <!-- Logout button, by default hidden -->
-          <button
-            id="logout-btn"
-            class="px-3 py-1 bg-red-500 text-white rounded hidden"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
-    </header>
 
-    <!-- Main Dashboard Content -->
-    <main class="pt-20 container mx-auto px-4">
-      <!-- Dashboard Header -->
-      <div class="mb-6">
+        <!-- Authentication Section -->
+        <div id="auth-section" class="flex items-center space-x-4 md:flex-row flex-col">
+            <span id="user-info" class="text-gray-700"></span>
+            <button id="logout-btn" class="px-3 py-1 bg-red-500 text-white rounded hidden">Logout</button>
+            <button id="login-btn" class="px-3 py-1 bg-blue-500 text-white rounded hidden">Login</button>
+        </div>
+    </div>
+</header>
+
+<main class="pt-20 container mx-auto px-4">
+    <!-- Dashboard Header -->
+    <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
-      </div>
-
-      <!-- New UI Menus / Sections -->
-      <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Analytics Overview Card -->
-        <div class="bg-white p-6 rounded shadow-lg">
-          <h2 class="text-xl font-semibold mb-4">Analytics Overview</h2>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="bg-gray-100 p-4 rounded">
-              <p class="text-gray-600">Team Members:</p>
-              <p class="text-gray-800 font-bold">1 of 5</p>
-            </div>
-            <div class="bg-gray-100 p-4 rounded">
-              <p class="text-gray-600">Total Agents:</p>
-              <p class="text-gray-800 font-bold">13 of 10000</p>
-            </div>
-            <div class="bg-gray-100 p-4 rounded">
-              <p class="text-gray-600">Words Stored:</p>
-              <p class="text-gray-800 font-bold">41.3M of 30B</p>
-            </div>
-            <div class="bg-gray-100 p-4 rounded">
-              <p class="text-gray-600">Queries:</p>
-              <p class="text-gray-800 font-bold">321 of 400K</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Resources Card -->
-        <div class="bg-white p-6 rounded shadow-lg">
-          <h2 class="text-xl font-semibold mb-4">Resource Center</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="flex items-center space-x-2">
-              <i class="fas fa-book text-2xl text-gray-600"></i>
-              <span class="text-gray-700">User Guides</span>
-            </div>
-            <div class="flex items-center space-x-2">
-              <i class="fas fa-question-circle text-2xl text-gray-600"></i>
-              <span class="text-gray-700">Ask Kyro</span>
-            </div>
-            <div class="flex items-center space-x-2">
-              <i class="fas fa-code text-2xl text-gray-600"></i>
-              <span class="text-gray-700">API</span>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <!-- Auth Modal: Jab user authenticated nahi hai ya logout hone ke baad message dikhaye -->
-    <div
-      id="auth-modal"
-      class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden"
-    >
-      <div class="bg-white p-8 rounded shadow-lg text-center">
-        <p class="mb-4 text-gray-700">
-          Aap authenticated nahi hain ya logout ho chuke hain.
-        </p>
-        <p class="mb-4 text-green-600" id="redirect-msg">
-          Redirecting to login...
-        </p>
-      </div>
     </div>
 
-    <script>
-      // Supabase client initialize kar rahe hain (SUPABASE_URL aur SUPABASE_KEY ko replace karein)
-      const SUPABASE_URL = "https://your-supabase-url.supabase.co";
-      const SUPABASE_KEY = "your-public-anon-key";
-      const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <!-- New UI Menus / Sections cleared out as requested -->
+    <section id="dashboard-content" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Content will be here when ready -->
+    </section>
+</main>
 
-      // Function: User ke session ko check karta hai
-      async function checkUserSession() {
-        // Supabase se current session lena
-        const { data: { session }, error } = await supabaseClient.auth.getSession();
-        if (error) {
-          console.error("Session fetch karte waqt error:", error);
-          return null;
-        }
-        console.log("Session details:", session); // Debug log in Hinglish
-        return session;
-      }
+<!-- Auth Modal -->
+<div id="auth-modal"
+     class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white p-8 rounded shadow-lg text-center">
+        <p class="mb-4 text-gray-700">Aap authenticated nahi hain ya logout ho chuke hain.</p>
+        <p class="mb-4 text-green-600" id="redirect-msg">Redirecting to login...</p>
+    </div>
+</div>
 
-      // Function: Header me user detail aur logout button display karta hai
-      async function renderAuthUI() {
-        const session = await checkUserSession();
-        const userInfoSpan = document.getElementById("user-info");
-        const logoutBtn = document.getElementById("logout-btn");
+<script>
+// Supabase client initialize kar rahe hain
+const SUPABASE_URL = "https://your-supabase-url.supabase.co"; 
+const SUPABASE_KEY = "your-public-anon-key"; 
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        if (session && session.user) {
-          // Agar session valid hai, to user ka email ya name display karen
-          const user = session.user;
-          userInfoSpan.textContent = `Welcome, ${user.email}`;
-          logoutBtn.classList.remove("hidden");
-        } else {
-          // Agar session nahi hai, modal dikhao aur redirect karo
-          showAuthModal();
-        }
-      }
+// Function: User ke session ko check karta hai
+async function checkUserSession() {
+  const { data: { session }, error } = await supabaseClient.auth.getSession();
+  if (error) {
+      console.error("Session fetch karte waqt error:", error);
+      return null;
+  }
+  return session;
+}
 
-      // Function: Modal show karta hai aur login page pe redirect karta hai
-      function showAuthModal() {
-        console.log("User authenticated nahi hai, modal dikha rahe hain");
-        const authModal = document.getElementById("auth-modal");
-        authModal.classList.remove("hidden");
+// Function: UI render karta hai based on authentication state
+async function renderAuthUI() {
+  const session = await checkUserSession();
+  const userInfoSpan = document.getElementById("user-info");
+  const logoutBtn = document.getElementById("logout-btn");
+  const loginBtn = document.getElementById("login-btn");
 
-        // Redirect message update kar rahe hain
-        document.getElementById("redirect-msg").textContent =
-          "Redirecting to login page...";
+  if (session && session.user) {
+      const user = session.user;
+      userInfoSpan.textContent = `Welcome, ${user.email}`;
+      logoutBtn.classList.remove("hidden");
+      loginBtn.classList.add("hidden");
+      document.getElementById("profile-link").classList.remove("hidden");
+  } else {
+      userInfoSpan.textContent = '';
+      logoutBtn.classList.add("hidden");
+      loginBtn.classList.remove("hidden");
+      showAuthModal();
+  }
+}
 
-        // 3 seconds ke baad login page pe redirect
-        setTimeout(() => {
-          window.location.href = "redirect.html";
-        }, 3000);
-      }
+// Function: Modal show karta hai aur login page pe redirect karta hai
+function showAuthModal() {
+  const authModal = document.getElementById("auth-modal");
+  authModal.classList.remove("hidden");
+  document.getElementById("redirect-msg").textContent = "Redirecting to login page...";
+  setTimeout(() => {
+      window.location.href = "redirect.html";
+  }, 3000);
+}
 
-      // Function: Logout process, Supabase se signOut karta hai
-      async function logoutUser() {
-        console.log("Logout button click hua, signout process shuru kar rahe hain");
-        const { error } = await supabaseClient.auth.signOut();
-        if (error) {
-          console.error("Logout ke dauran error:", error);
-        } else {
-          console.log("Logout successful, redirecting user...");
-          // Logout ke baad modal show karo with message
-          const authModal = document.getElementById("auth-modal");
-          authModal.classList.remove("hidden");
-          document.getElementById("redirect-msg").textContent =
-            "Logout successful! Redirecting...";
-          // 3 second baad login page pe redirect
-          setTimeout(() => {
-            window.location.href = "redirect.html";
-          }, 3000);
-        }
-      }
+// Function: Logout process
+async function logoutUser() {
+  const { error } = await supabaseClient.auth.signOut();
+  if (error) {
+      console.error("Logout ke dauran error:", error);
+  } else {
+      location.reload(); // Reload for updated UI
+  }
+}
 
-      // Event Listener: Logout button ka click event
-      document.getElementById("logout-btn").addEventListener("click", logoutUser);
+// Hamburger menu toggle
+document.getElementById("hamburger").addEventListener("click", () => {
+   const navMenu = document.getElementById("nav-menu");
+   navMenu.classList.toggle('hidden');
+});
 
-      // Page load hone pe authentication check karo aur UI render karo
-      document.addEventListener("DOMContentLoaded", () => {
-        console.log("Page load ho gaya, user authentication check kar rahe hain");
-        renderAuthUI();
-      });
-    </script>
-  </body>
-</html>
+// Event Listener: Logout button ka click event
+document.getElementById("logout-btn").addEventListener("click", logoutUser);
+
+// Page load hone pe authentication check karo aur UI render karo
+document.addEventListener("DOMContentLoaded", () => {
+   renderAuthUI();
+});
+</script>
+
+</body>
+</html>     
