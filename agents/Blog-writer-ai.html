@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title> Blogging expert </title>
+  <title>Blogging Expert</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <style>
@@ -29,7 +29,7 @@
 <body class="bg-gray-900 text-white font-sans">
   <div class="min-h-screen flex flex-col items-center p-6">
     <header class="w-full max-w-5xl mb-6">
-      <h1 class="text-4xl font-bold mb-2">  blogging Ai </h1>
+      <h1 class="text-4xl font-bold mb-2">Blogging AI</h1>
       <p class="text-gray-400">Generate SEO-optimized blog content with AI in seconds</p>
     </header>
 
@@ -44,9 +44,7 @@
         <select id="modelSelect" class="w-full p-3 rounded bg-gray-800 border border-gray-600 text-white">
           <option value="gpt-4o">GPT-4o (Advanced)</option>
           <option value="gpt-3.5-turbo">GPT-3.5 Turbo (Faster)</option>
-
-          <option value="deepseek/deepseek-r1">  deepseekr1(for premium response) </option>
-
+          <option value="deepseek/deepseek-r1">DeepSeek R1 (Premium)</option>
         </select>
       </div>
 
@@ -54,7 +52,7 @@
         Generate Content
       </button>
 
-      <div id="loading" class="mt-4 hidden text-blue-400 typing-indicator"> Cooking your stuff...</div>
+      <div id="loading" class="mt-4 hidden text-blue-400 typing-indicator">Cooking your stuff...</div>
 
       <div id="resultModal" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-70 flex items-center justify-center z-50">
         <div class="bg-gray-800 rounded-lg p-6 w-full max-w-3xl relative">
@@ -110,7 +108,6 @@ Tone should be friendly, human-like, and educational. Avoid overly robotic phras
 - format this blog post into html with tailwi nd   in professional way to see a better eye catching blog.
 
 - in the  top feild  please   fill title of post not any type of other content in this field. 
- 
 `
               },
               {
@@ -127,20 +124,11 @@ Tone should be friendly, human-like, and educational. Avoid overly robotic phras
           }),
         });
 
-        if (!response.ok) {
-          let message = `${response.status} ${response.statusText}`;
-          try {
-            const errorData = await response.json();
-            message = errorData?.error?.message || message;
-          } catch (e) {}
-          throw new Error(`API Error: ${message}`);
-        }
-
+        if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText}`);
         const data = await response.json();
         const outputText = data?.choices?.[0]?.message?.content || 'No response text found.';
 
         const editableContainer = document.createElement('div');
-
         const headingContainer = document.createElement('div');
         headingContainer.className = 'editable-heading mb-2';
 
@@ -157,7 +145,7 @@ Tone should be friendly, human-like, and educational. Avoid overly robotic phras
         editableContainer.appendChild(textarea);
 
         const buttonGroup = document.createElement('div');
-        buttonGroup.className = 'flex gap-2';
+        buttonGroup.className = 'flex gap-2 flex-wrap';
 
         const copyBtn = document.createElement('button');
         copyBtn.textContent = 'Copy';
@@ -174,22 +162,38 @@ Tone should be friendly, human-like, and educational. Avoid overly robotic phras
           editableContainer.remove();
         };
 
+        const downloadTxtBtn = document.createElement('button');
+        downloadTxtBtn.textContent = 'Download TXT';
+        downloadTxtBtn.className = 'bg-green-600 hover:bg-green-700 px-4 py-2 rounded';
+        downloadTxtBtn.onclick = () => {
+          const blogTitle = editableTitle.value.replace(/[^a-z0-9]/gi, '_').toLowerCase().slice(0, 40);
+          const blob = new Blob([textarea.value], { type: 'text/plain' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = `${blogTitle || 'blog_article'}.txt`;
+          a.click();
+        };
+
+        const downloadPdfBtn = document.createElement('button');
+        downloadPdfBtn.textContent = 'Download PDF';
+        downloadPdfBtn.className = 'bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded';
+        downloadPdfBtn.onclick = () => {
+          const blogTitle = editableTitle.value.replace(/[^a-z0-9]/gi, '_').toLowerCase().slice(0, 40);
+          const pdfWindow = window.open("", "_blank");
+          pdfWindow.document.write(`<pre style='font-family: sans-serif; white-space: pre-wrap;'>${textarea.value}</pre>`);
+          pdfWindow.document.close();
+          pdfWindow.print();
+        };
+
         buttonGroup.appendChild(copyBtn);
+        buttonGroup.appendChild(downloadTxtBtn);
+        buttonGroup.appendChild(downloadPdfBtn);
         buttonGroup.appendChild(deleteBtn);
+
         editableContainer.appendChild(buttonGroup);
 
         result.appendChild(editableContainer);
         resultModal.classList.remove('hidden');
-
-        // Auto-download the content
-        const blogTitle = editableTitle.value.replace(/[^a-z0-9]/gi, '_').toLowerCase().slice(0, 40);
-        const blob = new Blob([textarea.value], { type: 'text/plain' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `${blogTitle || 'blog_article'}.txt`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
 
       } catch (error) {
         console.error('Generation error:', error);
@@ -199,43 +203,6 @@ Tone should be friendly, human-like, and educational. Avoid overly robotic phras
         loading.classList.add('hidden');
       }
     }
-    
-    
-    
-     const apiKey = "<YOUR_AIMLAPI_KEY>"; // Replace with your actual API key
-const url = "https://api.aimlapi.com/v1/chat/completions";
-
-const data = {
-    model: "deepseek/deepseek-r1",
-    messages: [
-        {
-            role: "user",
-            content: "Hello" // Replace with your question
-        }
-    ]
-};
-
-fetch(url, {
-    method: 'POST',
-    headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
-})
-.then(response => {
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
-})
-.then(responseData => {
-    console.log(responseData);
-})
-.catch(error => {
-    console.error("Error:", error);
-});
-
   </script>
 </body>
 </html>
