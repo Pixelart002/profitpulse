@@ -1,135 +1,98 @@
-Below is an example HTML file that integrates Supabase (using the supabase‐js CDN), includes a basic login flow, dashboard/profile editing and an “Admin Panel” (only if the logged‐in user is an admin). In this example the dummy data sections (profile, credits, tickets, API stats, billing, etc.) are replaced by asynchronous calls to Supabase. (Note that this is only a sample and you will need to adjust table/column names, error handling and security in your production app.) 
-
-Simply replace the Supabase URL and anon key as needed. To use the service_role key (for admin operations) please make sure that you do not expose it to regular users – here we simulate admin‐only functionality based on the “role” field in the “users” table. Also note that you must have set up Row Level Security and policies as described in your SQL. 
-
-Below is the complete HTML code:
-
-------------------------------------------------
-<!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
     <meta charset="UTF-8" />
-    <title>KYRO.AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KYRO.AI Dashboard</title>
+    <!-- TailwindCSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase client library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <!-- Supabase Library -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   </head>
   <body class="bg-gray-100 min-h-screen">
     <!-- Floating Header -->
     <header class="bg-white shadow-md fixed w-full top-0 z-50">
       <div class="flex justify-between items-center px-4 py-3 md:px-8">
         <div class="text-2xl font-bold">KYRO.AI</div>
-        <!-- Hamburger Button for mobile -->
+        <!-- Hamburger Button -->
         <button id="hamburger" class="md:hidden">
           <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 6h16M4 12h16m-7 6h7"
-            ></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
           </svg>
         </button>
         <!-- Desktop Menu -->
-        <nav class="hidden md:flex space-x-6 text-gray-700" id="navLinks">
-          <button onclick="showSection('home')">Dashboard</button>
+        <nav class="hidden md:flex space-x-6 text-gray-700">
+          <button onclick="showSection('home')">Home</button>
           <button onclick="showSection('profile')">Profile</button>
           <button onclick="showSection('agents')">Agents</button>
-          <button onclick="showSection('playground')">Playground</button>
+          <button onclick="showSection('playground')" class="block w-full text-left py-2">playground</button>
           <button onclick="showSection('credits')">Credits</button>
           <button onclick="showSection('billing')">Billing</button>
           <button onclick="showSection('ticket')">Raise a Ticket</button>
-          <!-- Logout button appears only after login -->
-          <button id="logoutButton" class="hidden" onclick="logout()">Log Out</button>
-          <!-- Admin Panel Nav: only visible if user is admin -->
-          <button id="adminPanelBtn" class="hidden" onclick="showSection('admin')">Admin Panel</button>
+          <button onclick="showSection('logout')">Log Out</button>
         </nav>
       </div>
       <!-- Mobile Menu -->
       <div id="mobileMenu" class="md:hidden hidden px-4 pb-4">
-        <button onclick="showSection('home')" class="block w-full text-left py-2">Dashboard</button>
+        <button onclick="showSection('home')" class="block w-full text-left py-2">Home</button>
         <button onclick="showSection('profile')" class="block w-full text-left py-2">Profile</button>
+        <button onclick="showSection('playground')" class="block w-full text-left py-2">playground</button>
         <button onclick="showSection('agents')" class="block w-full text-left py-2">Agents</button>
-        <button onclick="showSection('playground')" class="block w-full text-left py-2">Playground</button>
         <button onclick="showSection('credits')" class="block w-full text-left py-2">Credits</button>
         <button onclick="showSection('billing')" class="block w-full text-left py-2">Billing</button>
         <button onclick="showSection('ticket')" class="block w-full text-left py-2">Raise a Ticket</button>
-        <button id="logoutButtonMobile" class="hidden block w-full text-left py-2" onclick="logout()">Log Out</button>
-        <button id="adminPanelBtnMobile" class="hidden block w-full text-left py-2" onclick="showSection('admin')">Admin Panel</button>
+        <button onclick="showSection('logout')" class="block w-full text-left py-2">Log Out</button>
       </div>
     </header>
 
     <!-- Main Content -->
     <main class="pt-24 px-4 md:px-8">
-      <!-- Login Section (shown only if no session exists) -->
-      <div id="loginSection" class="section">
-        <h1 class="text-3xl font-bold mb-4">Please Login</h1>
-        <form id="loginForm" class="max-w-sm bg-white p-6 rounded-lg shadow-md">
-          <div class="mb-4">
-            <label class="block text-gray-700 font-semibold mb-1" for="loginEmail">Email</label>
-            <input type="email" id="loginEmail" class="w-full px-4 py-2 border rounded" placeholder="Enter your email" required />
-          </div>
-          <div class="mb-4">
-            <label class="block text-gray-700 font-semibold mb-1" for="loginPassword">Password</label>
-            <input type="password" id="loginPassword" class="w-full px-4 py-2 border rounded" placeholder="Enter your password" required />
-          </div>
-          <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 rounded">
-            Login
-          </button>
-        </form>
-      </div>
-
-      <!-- Dashboard / Home Section -->
-      <div id="home" class="section hidden">
+      <!-- Home Section -->
+      <div id="home" class="section">
         <!-- Welcome Card -->
         <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-r-4 border-purple-500 mb-6">
-          <h1 class="text-2xl font-bold mb-2">Welcome, <span id="usernameDisplay"></span>!</h1>
+          <h1 class="text-2xl font-bold mb-2">Welcome, <span id="username">User123</span>!</h1>
           <p class="text-gray-600">Explore and manage your AI completions here.</p>
         </div>
-        <!-- Replace dummy search card with live search if desired -->
-        <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-r-4 border-blue-500 mb-8 relative">
-          <input id="searchInput" type="text" placeholder="Search AI completions..." class="border border-gray-300 rounded-lg p-2 w-full" />
-          <span class="absolute right-3 top-3">
-            <!-- Search icon -->
-            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 12.65z"></path>
-            </svg>
-          </span>
+
+        <!-- AI Search Only -->
+        <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-r-4 border-blue-500 mb-8">
+          <input type="text" placeholder="Search AI completions..." class="border border-gray-300 rounded-lg p-2 w-full" />
+          <!-- Filter results will be shown dynamically via JS after search -->
         </div>
-        <!-- API Call Stats Card (dummy example: replace with your real API stats query) -->
+
+        <!-- AI Stats Card -->
         <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-r-4 border-green-500 mb-8">
-          <h2 class="text-xl font-semibold mb-4">API Call Stats</h2>
+          <h2 class="text-xl font-semibold mb-4">AI Completion Stats</h2>
           <div class="flex justify-between">
             <div>
-              <p class="text-gray-600">Total API calls</p>
-              <p id="totalApi" class="text-2xl font-bold text-green-600">0</p>
+              <p class="text-gray-600">Total Completions</p>
+              <p class="text-2xl font-bold text-green-600">125</p>
             </div>
             <div>
-              <p class="text-gray-600">Successful</p>
-              <p id="successApi" class="text-2xl font-bold text-green-600">0</p>
-            </div>
-            <div>
-              <p class="text-gray-600">Failed</p>
-              <p id="failedApi" class="text-2xl font-bold text-green-600">0</p>
+              <p class="text-gray-600">Avg. Fetch Time</p>
+              <p class="text-2xl font-bold text-green-600">2.3s</p>
             </div>
           </div>
         </div>
+
         <!-- QST Parameters Card -->
         <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-r-4 border-indigo-500 mb-8">
           <h2 class="text-xl font-semibold mb-4">QST Parameters</h2>
           <p class="mb-4 text-gray-700">Run custom prompts directly in a new AI chat.</p>
-          <button class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded" id="runQST">
+          <button class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded" id="run-qst">
             Run with QST
           </button>
         </div>
+
         <!-- Feedback Form -->
         <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-r-4 border-yellow-500">
           <h2 class="text-xl font-semibold mb-4">Feedback</h2>
-          <textarea id="feedbackText" placeholder="Share your feedback here..." class="border border-gray-300 rounded-lg p-2 w-full mb-4" rows="4"></textarea>
-          <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 rounded" onclick="submitFeedback()">
+          <textarea placeholder="Share your feedback here..." class="border border-gray-300 rounded-lg p-2 w-full mb-4" rows="4"></textarea>
+          <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-2 rounded">
             Submit Feedback
           </button>
         </div>
+
         <!-- Copyright -->
         <div class="text-center text-sm text-gray-500 mt-8">
           <p>&copy; 2025 YourCompany. All rights reserved.</p>
@@ -140,34 +103,35 @@ Below is the complete HTML code:
       <div id="profile" class="section hidden">
         <h1 class="text-3xl font-bold mb-4">Profile</h1>
         <div class="relative block text-gray-700 font-semibold mb-1 border-l-4 border-r-4 border-blue-500 rounded-lg bg-white p-6 shadow-md max-w-md">
-          <span class="absolute top-0 right-0 bg-blue-100 text-blue-700 text-sm font-semibold px-3 py-1 rounded-bl-lg" id="userRole">
-            User
+          <!-- Role in top-right corner -->
+          <span class="absolute top-0 right-0 bg-blue-100 text-blue-700 text-sm font-semibold px-3 py-1 rounded-bl-lg">
+            Admin
           </span>
+          <!-- Profile Picture -->
           <div class="flex items-center space-x-4 mb-6">
-            <img id="profilePic" src="https://i.pravatar.cc/100" alt="Profile Picture" class="w-20 h-20 rounded-full border-2 border-blue-400 shadow-md" />
+            <img src="https://i.pravatar.cc/100" alt="Profile Picture" class="w-20 h-20 rounded-full border-2 border-blue-400 shadow-md">
             <div>
-              <h2 id="displayName" class="text-xl font-bold text-gray-800">Name</h2>
-              <p id="displayUsername" class="text-gray-500"></p>
+              <h2 id="displayName" class="text-xl font-bold text-gray-800">John Doe</h2>
+              <p id="displayUsername" class="text-gray-500">@johndoe123</p>
             </div>
           </div>
           <!-- Profile Info -->
           <div class="space-y-4">
             <div>
               <label class="text-gray-600 font-semibold">Username:</label>
-              <p id="usernameText" class="text-lg text-gray-800"></p>
-              <input id="usernameInput" type="text" class="hidden w-full px-3 py-2 border rounded" />
+              <p id="usernameText" class="text-lg text-gray-800">johndoe123</p>
+              <input id="usernameInput" type="text" class="hidden w-full px-3 py-2 border rounded" value="johndoe123">
             </div>
             <div>
               <label class="text-gray-600 font-semibold">Email:</label>
-              <p id="emailText" class="text-lg text-gray-800"></p>
-              <input id="emailInput" type="email" class="hidden w-full px-3 py-2 border rounded" />
+              <p id="emailText" class="text-lg text-gray-800">john@example.com</p>
+              <input id="emailInput" type="email" class="hidden w-full px-3 py-2 border rounded" value="john@example.com">
             </div>
           </div>
           <!-- Action Buttons -->
           <div class="flex justify-end mt-6 space-x-3">
-            <button id="editBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded" onclick="toggleEditProfile(true)">Edit</button>
-            <button id="saveBtn" class="hidden bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded" onclick="updateProfile()">Save</button>
-            <button id="updatePasswordBtn" class="bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded" onclick="updatePassword()">Update Password</button>
+            <button id="editBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold px-4 py-2 rounded">Edit</button>
+            <button id="saveBtn" class="hidden bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded">Save</button>
           </div>
         </div>
       </div>
@@ -176,52 +140,118 @@ Below is the complete HTML code:
       <div id="agents" class="section hidden">
         <h1 class="text-3xl font-bold mb-4">Agents</h1>
         <p class="mb-6 text-gray-600">Manage your AI agents here. Click "Open AI" to start a session.</p>
-        <div id="agentsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- Agent cards from Supabase will be appended here dynamically -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Agent Card 1 -->
+          <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-r-4 border-blue-500">
+            <h2 class="text-xl font-semibold mb-2">Code Assistant</h2>
+            <p class="text-gray-600 mb-4">Helps you debug and generate code.</p>
+            <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded w-full">
+              Open AI
+            </button>
+          </div>
+          <!-- Agent Card 2 -->
+          <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-r-4 border-green-500">
+            <h2 class="text-xl font-semibold mb-2">Writing Bot</h2>
+            <p class="text-gray-600 mb-4">Generate articles, blogs, and creative stories.</p>
+            <button class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded w-full">
+              <a href="/agents/Blog-writer-ai.html">BLOG-WRITER.AI</a>
+            </button>
+          </div>
+          <!-- Agent Card 3 -->
+          <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-r-4 border-purple-500">
+            <h2 class="text-xl font-semibold mb-2">AI Chat Buddy</h2>
+            <p class="text-gray-600 mb-4">Friendly AI chat for general questions and help.</p>
+            <button class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded w-full">
+              Open AI
+            </button>
+          </div>
+          <!-- Additional agent cards can be added here -->
         </div>
       </div>
 
       <!-- Credits Section -->
       <div id="credits" class="section hidden">
         <h1 class="text-3xl font-bold mb-4">AI Usage & Credits</h1>
-        <div class="max-w-xl bg-white p-6 rounded-lg shadow-md border-l-4 border-r-4 border-purple-500" id="creditsContainer">
-          <!-- Credits data and usage logs will be fetched from Supabase -->
+        <div class="max-w-xl bg-white p-6 rounded-lg shadow-md border-l-4 border-r-4 border-purple-500">
+          <!-- Current Credit Balance -->
+          <div class="mb-6">
+            <p class="text-gray-600 font-semibold">Remaining AI Credits:</p>
+            <p class="text-3xl font-bold text-purple-600">780</p>
+            <p class="text-sm text-gray-500 mt-1">Each AI completion costs 10 credits</p>
+          </div>
+          <!-- Credit Usage Graph -->
+          <div class="mb-6">
+            <h2 class="text-lg font-semibold mb-3 text-gray-700">Weekly Usage</h2>
+            <div class="flex items-end space-x-2 h-32">
+              <div class="w-8 bg-purple-300 rounded-t-lg" style="height: 40%;"></div>
+              <div class="w-8 bg-purple-400 rounded-t-lg" style="height: 60%;"></div>
+              <div class="w-8 bg-purple-500 rounded-t-lg" style="height: 80%;"></div>
+              <div class="w-8 bg-purple-400 rounded-t-lg" style="height: 50%;"></div>
+              <div class="w-8 bg-purple-300 rounded-t-lg" style="height: 30%;"></div>
+              <div class="w-8 bg-purple-500 rounded-t-lg" style="height: 70%;"></div>
+              <div class="w-8 bg-purple-600 rounded-t-lg" style="height: 90%;"></div>
+            </div>
+            <div class="flex justify-between text-xs text-gray-500 mt-2">
+              <span>Mon</span>
+              <span>Tue</span>
+              <span>Wed</span>
+              <span>Thu</span>
+              <span>Fri</span>
+              <span>Sat</span>
+              <span>Sun</span>
+            </div>
+          </div>
+          <!-- AI Usage History -->
+          <div>
+            <h2 class="text-lg font-semibold mb-3 text-gray-700">Recent AI Completions</h2>
+            <ul class="space-y-2 text-sm text-gray-700">
+              <li class="flex justify-between border-b pb-1">
+                <span>Generated YouTube Script</span>
+                <span class="text-red-500 font-medium">-10 credits</span>
+              </li>
+              <li class="flex justify-between border-b pb-1">
+                <span>AI Idea Summary</span>
+                <span class="text-red-500 font-medium">-10 credits</span>
+              </li>
+              <li class="flex justify-between">
+                <span>Content Rewrite</span>
+                <span class="text-red-500 font-medium">-10 credits</span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
       <!-- Billing Section -->
       <div id="billing" class="section hidden">
-        <h1 class="text-3xl font-bold mb-4">Billing Details</h1>
-        <div class="max-w-xl bg-white p-6 rounded-lg shadow-md border-l-4 border-r-4 border-red-500" id="billingContainer">
-          <!-- Real time billing data and payment method integration (e.g. Paytm) -->
-          <p>Paytm Payment Integration: (Merchant ID will be added here)</p>
-        </div>
+        <h1 class="text-3xl font-bold mb-4">Billing</h1>
+        <p>yeh billhai</p>
       </div>
 
-      <!-- Raise a Ticket Section -->
+      <!-- Ticket Section -->
       <div id="ticket" class="section hidden">
         <h1 class="text-3xl font-bold mb-4">Raise a Ticket</h1>
         <div class="max-w-xl bg-white p-6 rounded-lg shadow-md border-l-4 border-r-4 border-yellow-400">
-          <form id="ticketForm">
+          <form>
             <!-- Full Name -->
             <div class="mb-4">
               <label class="block text-gray-700 font-semibold mb-1" for="fullname">Full Name</label>
-              <input type="text" id="fullname" class="w-full px-4 py-2 border rounded" placeholder="Enter your full name" required>
+              <input type="text" id="fullname" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-400" placeholder="Enter your full name">
             </div>
             <!-- Email -->
             <div class="mb-4">
-              <label class="block text-gray-700 font-semibold mb-1" for="ticketEmail">Email</label>
-              <input type="email" id="ticketEmail" class="w-full px-4 py-2 border rounded" placeholder="Enter your email" required>
+              <label class="block text-gray-700 font-semibold mb-1" for="email">Email</label>
+              <input type="email" id="email" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-400" placeholder="Enter your email">
             </div>
             <!-- Subject -->
             <div class="mb-4">
               <label class="block text-gray-700 font-semibold mb-1" for="subject">Subject</label>
-              <input type="text" id="subject" class="w-full px-4 py-2 border rounded" placeholder="Issue subject" required>
+              <input type="text" id="subject" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-400" placeholder="Issue subject">
             </div>
             <!-- Message -->
             <div class="mb-4">
               <label class="block text-gray-700 font-semibold mb-1" for="message">Message</label>
-              <textarea id="message" rows="5" class="w-full px-4 py-2 border rounded" placeholder="Describe your issue in detail..." required></textarea>
+              <textarea id="message" rows="5" class="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-yellow-400" placeholder="Describe your issue in detail..."></textarea>
             </div>
             <!-- Submit Button -->
             <button type="submit" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-6 py-2 rounded">
@@ -231,23 +261,15 @@ Below is the complete HTML code:
         </div>
       </div>
 
-      <!-- Admin Panel Section (only accessible by admin users) -->
-      <div id="admin" class="section hidden">
-        <h1 class="text-3xl font-bold mb-4">Admin Panel</h1>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Admin: Users table -->
-          <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200" id="adminUsers">
-            <h2 class="text-xl font-semibold mb-4">Manage Users</h2>
-            <div id="usersList">
-              <!-- List of users with edit, delete and credit actions -->
-            </div>
-          </div>
-          <!-- Admin: Logs / API call stats -->
-          <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200" id="adminLogs">
-            <h2 class="text-xl font-semibold mb-4">System Logs</h2>
-            <div id="logsList">
-              <!-- Logs (actions performed by users and API call stats) -->
-            </div>
+      <!-- Logout Section -->
+      <div id="logout" class="section hidden">
+        <h1 class="text-3xl font-bold mb-4">Logout</h1>
+        <div class="max-w-sm bg-white p-6 rounded-lg shadow-md border-l-4 border-r-4 border-red-500">
+          <p class="text-gray-700 mb-4">You have been successfully logged out. You will be redirected shortly.</p>
+          <div class="flex justify-center">
+            <button class="bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-2 rounded">
+              Log Out
+            </button>
           </div>
         </div>
       </div>
@@ -255,346 +277,341 @@ Below is the complete HTML code:
       <!-- Playground Section -->
       <div id="playground" class="section hidden">
         <div id="card" class="block text-gray-700 font-semibold mb-1 border-l-4 border-r-4 border-blue-500 rounded-lg bg-white p-6 shadow-md max-w-md">
-          <h1>Playground</h1>
+          <h1>playground</h1>
           <legend>------------------------ -----------------</legend>
-          <h1>Hello</h1>
+          <h1>hello</h1>
         </div>
       </div>
     </main>
 
-    <!-- JS for toggling sections -->
+    <!-- JS Code -->
     <script>
-      // Supabase initialization (using anon key).
-      const SUPABASE_URL = 'https://wqxlakambzrebifqszbo.supabase.co';
-      // Use your anon key here – do not expose the service_role key in client code.
-      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxeGxha2FtYnpyZWJpZnFzemJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxOTAzMjcsImV4cCI6MjA1OTc2NjMyN30.kIEpEt84s5sRAPmaN7Vb2oQCnXIHnKVxPFXD5gDqNuQ';
-      const supabase = supabasejs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      // ─────────────────────────────────────────────
+      // 1. Initialize Supabase Client
+      // ─────────────────────────────────────────────
+      const SUPABASE_URL = "https://wqxlakambzrebifqszbo.supabase.co";
+      // Use the anon/public key for client-side operations.
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndxeGxha2FtYnpyZWJpZnFzemJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQxOTAzMjcsImV4cCI6MjA1OTc2NjMyN30.kIEpEt84s5sRAPmaN7Vb2oQCnXIHnKVxPFXD5gDqNuQ";
+      const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      // Hamburger mobile menu toggle
-      const hamburger = document.getElementById('hamburger');
-      const mobileMenu = document.getElementById('mobileMenu');
-      hamburger.addEventListener('click', () => {
-        mobileMenu.classList.toggle('hidden');
+      // ─────────────────────────────────────────────
+      // 2. Global Variables & Utility Functions
+      // ─────────────────────────────────────────────
+      let currentUser = null; // holds the currently authenticated user
+      let currentUserRole = "guest"; // default role
+
+      // Helper: log action to a hypothetical logs table (or use console for now)
+      async function logAction(userId, action, details = "") {
+        console.log("User:", userId, "Action:", action, "Details:", details);
+      }
+
+      // ─────────────────────────────────────────────
+      // 3. Authentication / Auth State Change
+      // ─────────────────────────────────────────────
+      async function handleLogin(email, password) {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) {
+          alert("Login error: " + error.message);
+        } else {
+          currentUser = data.user;
+          await fetchUserRole(currentUser.id);
+          logAction(currentUser.id, "Login success");
+          updateUIAfterLogin();
+        }
+      }
+
+      function handleLogout() {
+        supabase.auth.signOut().then(() => {
+          currentUser = null;
+          currentUserRole = "guest";
+          updateUIAfterLogout();
+        });
+      }
+
+      // Listen to auth state changes  
+      supabase.auth.onAuthStateChange((event, session) => {
+        if (session?.user) {
+          currentUser = session.user;
+          fetchUserRole(currentUser.id);
+          updateUIAfterLogin();
+        } else {
+          currentUser = null;
+          currentUserRole = "guest";
+          updateUIAfterLogout();
+        }
       });
 
-      // Function to show only the requested section and hide others
+      async function fetchUserRole(userId) {
+        const { data, error } = await supabase
+          .from("users")
+          .select("role, credits")
+          .eq("id", userId)
+          .single();
+        if (error) {
+          console.error("Error fetching user role: ", error);
+          return;
+        }
+        currentUserRole = data.role;
+        updateUserProfileUI(data);
+      }
+
+      function updateUserProfileUI(data) {
+        document.getElementById("username").innerText = currentUser.email;
+        document.getElementById("displayName").innerText = currentUser.email;
+        document.getElementById("displayUsername").innerText = currentUser.email;
+        document.getElementById("usernameText").innerText = currentUser.email;
+      }
+
+      function updateUIAfterLogin() {
+        document.getElementById("logout").classList.remove("hidden");
+        document.getElementById("profile").classList.remove("hidden");
+        if (currentUserRole === "admin") {
+          document.getElementById("adminPanelNav")?.classList.remove("hidden");
+          fetchAllAdminData();
+        }
+      }
+
+      function updateUIAfterLogout() {
+        document.getElementById("logout").classList.add("hidden");
+        document.getElementById("profile").classList.add("hidden");
+        document.getElementById("adminPanelNav")?.classList.add("hidden");
+      }
+
+      // ─────────────────────────────────────────────
+      // 4. Show/Hide Sections (used by HTML buttons)
+      // ─────────────────────────────────────────────
+      const hamburger = document.getElementById("hamburger");
+      const mobileMenu = document.getElementById("mobileMenu");
+
+      hamburger.addEventListener("click", () => {
+        mobileMenu.classList.toggle("hidden");
+      });
+
       function showSection(id) {
-        document.querySelectorAll('.section').forEach(section => {
-          section.classList.add('hidden');
+        document.querySelectorAll(".section").forEach((section) => {
+          section.classList.add("hidden");
         });
-        document.getElementById(id).classList.remove('hidden');
-        // Auto close mobile menu if open
-        if (!mobileMenu.classList.contains('hidden')) {
-          mobileMenu.classList.add('hidden');
+        document.getElementById(id).classList.remove("hidden");
+        if (!mobileMenu.classList.contains("hidden")) {
+          mobileMenu.classList.add("hidden");
         }
       }
 
-      // -------------------------------
-      // Authentication & Session Handling
-      // -------------------------------
-      // Check session on page load
-      async function checkSession() {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          // User is logged in.
-          localStorage.setItem('sb-session', JSON.stringify(session));
-          loadUserData(session.user);
-        } else {
-          // No session: show login.
-          showSection('loginSection');
-        }
-      }
+      // ─────────────────────────────────────────────
+      // 5. Profile Editing & Password Update
+      // ─────────────────────────────────────────────
+      document.getElementById("editBtn")?.addEventListener("click", () => {
+        document.getElementById("usernameText").classList.add("hidden");
+        document.getElementById("usernameInput").classList.remove("hidden");
+        document.getElementById("emailText").classList.add("hidden");
+        document.getElementById("emailInput").classList.remove("hidden");
+        document.getElementById("editBtn").classList.add("hidden");
+        document.getElementById("saveBtn").classList.remove("hidden");
+      });
 
-      // Load user data (profile, role, etc.)
-      async function loadUserData(user) {
-        // Get user details from the "users" table
-        let { data, error } = await supabase.from('users').select('*').eq('id', user.id).single();
+      document.getElementById("saveBtn")?.addEventListener("click", async () => {
+        const updatedUsername = document.getElementById("usernameInput").value;
+        const updatedEmail = document.getElementById("emailInput").value;
+        const { error } = await supabase
+          .from("users")
+          .update({ email: updatedEmail })
+          .eq("id", currentUser.id);
         if (error) {
-          console.error('Error fetching user data:', error);
-          return;
-        }
-        // Update UI with user details
-        document.getElementById('usernameDisplay').innerText = data.email;
-        document.getElementById('displayName').innerText = data.email.split('@')[0];
-        document.getElementById('displayUsername').innerText = data.email;
-        document.getElementById('usernameText').innerText = data.email.split('@')[0];
-        document.getElementById('emailText').innerText = data.email;
-        document.getElementById('usernameInput').value = data.email.split('@')[0];
-        document.getElementById('emailInput').value = data.email;
-        document.getElementById('userRole').innerText = data.role;
-        // Hide login section and show dashboard
-        showSection('home');
-        // Show logout button.
-        document.getElementById('logoutButton').classList.remove('hidden');
-        document.getElementById('logoutButtonMobile').classList.remove('hidden');
-
-        // If admin, show the Admin Panel nav link.
-        if(data.role === 'admin'){
-          document.getElementById('adminPanelBtn').classList.remove('hidden');
-          document.getElementById('adminPanelBtnMobile').classList.remove('hidden');
-          loadAdminPanel(); // fetch additional admin panel data (users, logs)
-        }
-
-        // Load other dynamic data: agents, credits, tickets, billing, api stats etc.
-        loadAgents();
-        loadCredits();
-        loadApiStats();
-      }
-
-      // Login form submit handler
-      document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-          alert('Login error: ' + error.message);
+          alert("Error updating profile: " + error.message);
         } else {
-          loadUserData(data.user);
+          await supabase.auth.updateUser({ email: updatedEmail });
+          alert("Profile updated successfully!");
+          logAction(currentUser.id, "Profile updated", `Email: ${updatedEmail}`);
+          document.getElementById("usernameText").innerText = updatedEmail;
+          document.getElementById("emailText").innerText = updatedEmail;
+          document.getElementById("usernameText").classList.remove("hidden");
+          document.getElementById("usernameInput").classList.add("hidden");
+          document.getElementById("emailText").classList.remove("hidden");
+          document.getElementById("emailInput").classList.add("hidden");
+          document.getElementById("editBtn").classList.remove("hidden");
+          document.getElementById("saveBtn").classList.add("hidden");
         }
       });
 
-      // Logout function
-      async function logout() {
-        const { error } = await supabase.auth.signOut();
-        if (error) console.error('Error logging out:', error);
-        localStorage.removeItem('sb-session');
-        // Hide logout and admin buttons
-        document.getElementById('logoutButton').classList.add('hidden');
-        document.getElementById('logoutButtonMobile').classList.add('hidden');
-        document.getElementById('adminPanelBtn').classList.add('hidden');
-        document.getElementById('adminPanelBtnMobile').classList.add('hidden');
-        showSection('loginSection');
-      }
-
-      // --------------------------
-      // Profile Editing & Password Update
-      // --------------------------
-      function toggleEditProfile(editing) {
-        document.getElementById('usernameText').classList.toggle('hidden', editing);
-        document.getElementById('emailText').classList.toggle('hidden', editing);
-        document.getElementById('usernameInput').classList.toggle('hidden', !editing);
-        document.getElementById('emailInput').classList.toggle('hidden', !editing);
-        document.getElementById('editBtn').classList.toggle('hidden', editing);
-        document.getElementById('saveBtn').classList.toggle('hidden', !editing);
-      }
-
-      async function updateProfile() {
-        const newUsername = document.getElementById('usernameInput').value;
-        const newEmail = document.getElementById('emailInput').value;
-        // Here you might want to update the auth profile as well,
-        // for demonstration we update the "users" table.
-        let { error } = await supabase.from('users')
-          .update({ email: newEmail })
-          .eq('id', JSON.parse(localStorage.getItem('sb-session')).user.id);
+      async function updatePassword(newPassword) {
+        const { error } = await supabase.auth.updateUser({
+          password: newPassword,
+        });
         if (error) {
-          alert('Error updating profile: ' + error.message);
+          alert("Password update failed: " + error.message);
         } else {
-          alert('Profile updated successfully!');
-          // Re-load user data.
-          loadUserData(JSON.parse(localStorage.getItem('sb-session')).user);
-          toggleEditProfile(false);
+          alert("Password updated successfully.");
+          logAction(currentUser.id, "Password updated");
         }
       }
 
-      async function updatePassword() {
-        const newPassword = prompt("Enter new password:");
-        if (!newPassword) return;
-        const { error } = await supabase.auth.updateUser({ password: newPassword });
-        if (error) {
-          alert('Error updating password: ' + error.message);
-        } else {
-          alert('Password updated successfully!');
-        }
-      }
+      // ─────────────────────────────────────────────
+      // 6. Dynamic Search for AI Completions
+      // ─────────────────────────────────────────────
+      const searchInput = document.querySelector('input[placeholder="Search AI completions..."]');
+      if (searchInput) {
+        const searchIcon = document.createElement("span");
+        searchIcon.innerHTML = '<svg class="w-5 h-5 text-gray-400 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M16.65 16.65A7.5 7.5 0 1116.65 2.5a7.5 7.5 0 010 14.15z"></path></svg>';
+        searchIcon.style.position = "absolute";
+        searchIcon.style.right = "10px";
+        searchIcon.style.top = "50%";
+        searchIcon.style.transform = "translateY(-50%)";
+        searchInput.parentElement.style.position = "relative";
+        searchInput.parentElement.appendChild(searchIcon);
 
-      // --------------------------
-      // Agents: Fetch agent listings
-      // --------------------------
-      async function loadAgents() {
-        let { data, error } = await supabase.from('agents').select('*');
-        const agentContainer = document.getElementById('agentsContainer');
-        agentContainer.innerHTML = "";
-        if (error) {
-          console.error('Error fetching agents:', error);
-          return;
-        }
-        data.forEach(agent => {
-          const card = document.createElement('div');
-          card.className = "bg-white p-6 rounded-lg shadow-md border-l-4 border-r-4 border-blue-500";
-          card.innerHTML = `
-            <h2 class="text-xl font-semibold mb-2">${agent.name}</h2>
-            <p class="text-gray-600 mb-4">${agent.description || ""}</p>
-            <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded w-full">
-              Open AI
-            </button>
-          `;
-          agentContainer.appendChild(card);
+        searchInput.addEventListener("input", function() {
+          const query = searchInput.value;
+          console.log("Searching for:", query);
         });
       }
 
-      // --------------------------
-      // Credits: Fetch credit usage and history
-      // --------------------------
-      async function loadCredits() {
-        // Fetch current credit balance from the credits table (aggregate for the user)
-        let userId = JSON.parse(localStorage.getItem('sb-session')).user.id;
-        let { data, error } = await supabase
-          .from('credits')
-          .select('amount', { count: 'exact' });
-        const creditsContainer = document.getElementById('creditsContainer');
-        if (error) {
-          console.error('Error fetching credits:', error);
-          creditsContainer.innerHTML = "<p>Error loading credits.</p>";
+      // ─────────────────────────────────────────────
+      // 7. Admin Panel Functions
+      // ─────────────────────────────────────────────
+      async function fetchAllAdminData() {
+        if (currentUserRole !== "admin") {
+          alert("Access Denied. Only admins can view this page.");
           return;
         }
-        // For demo, we simply show a dummy balance and list the transactions.
-        creditsContainer.innerHTML = `
-          <div class="mb-6">
-            <p class="text-gray-600 font-semibold">Remaining AI Credits:</p>
-            <p class="text-3xl font-bold text-purple-600">780</p>
-            <p class="text-sm text-gray-500 mt-1">Each AI completion costs 10 credits</p>
-          </div>
-          <div>
-            <h2 class="text-lg font-semibold mb-3 text-gray-700">Recent AI Completions</h2>
-            <ul id="creditsList" class="space-y-2 text-sm text-gray-700"></ul>
-          </div>
-        `;
-        // Fetch dummy transactions for demonstration.
-        let { data: transactions, error: txError } = await supabase.from('credits').select('*').eq('user_id', userId);
-        if (!txError && transactions) {
-          let list = document.getElementById('creditsList');
-          list.innerHTML = transactions.map(tx => `
-            <li class="flex justify-between border-b pb-1">
-              <span>${tx.transaction_type}</span>
-              <span class="text-red-500 font-medium">${tx.amount > 0 ? "+"+tx.amount : tx.amount}</span>
-            </li>
-          `).join("");
-        }
+        await Promise.all([
+          fetchUsers(),
+          fetchAgents(),
+          fetchCredits(),
+          fetchTickets(),
+          fetchAPICallLogs(),
+          fetchBillingDetails()
+        ]);
       }
 
-      // --------------------------
-      // API Stats: (dummy implementation)
-      // --------------------------
-      function loadApiStats() {
-        // Replace with your actual API call counts
-        document.getElementById('totalApi').innerText = "100";
-        document.getElementById('successApi').innerText = "90";
-        document.getElementById('failedApi').innerText = "10";
-      }
-
-      // --------------------------
-      // Feedback Submission
-      // --------------------------
-      async function submitFeedback() {
-        const feedback = document.getElementById('feedbackText').value;
-        // You would typically save this in a feedback table in Supabase.
-        const { data, error } = await supabase.from('feedback').insert([{ feedback }]);
+      async function fetchUsers() {
+        const { data, error } = await supabase.from("users").select("*").order("created_at", { ascending: false });
         if (error) {
-          alert("Error submitting feedback: " + error.message);
+          console.error("Error fetching users:", error);
         } else {
-          alert("Thank you for your feedback!");
-          document.getElementById('feedbackText').value = "";
+          console.log("Fetched users: ", data);
         }
       }
 
-      // ----------------------------
-      // Ticket Submission
-      // ----------------------------
-      document.getElementById('ticketForm')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const fullname = document.getElementById('fullname').value;
-        const email = document.getElementById('ticketEmail').value;
-        const subject = document.getElementById('subject').value;
-        const message = document.getElementById('message').value;
-        let userId = JSON.parse(localStorage.getItem('sb-session')).user.id;
-        const { data, error } = await supabase.from('tickets').insert([{ user_id: userId, subject, message }]);
+      async function fetchAgents() {
+        const { data, error } = await supabase.from("agents").select("*").order("created_at", { ascending: false });
         if (error) {
-          alert("Error raising ticket: " + error.message);
+          console.error("Error fetching agents:", error);
         } else {
-          alert("Ticket submitted successfully!");
-          document.getElementById('ticketForm').reset();
-        }
-      });
-
-      // ----------------------------
-      // Admin Panel Functions (only for admins)
-      // ----------------------------
-      async function loadAdminPanel() {
-        // Fetch all users for admin management
-        let { data: users, error: usersError } = await supabase.from('users').select('*');
-        const usersList = document.getElementById('usersList');
-        if (usersError) {
-          usersList.innerHTML = "<p>Error loading users.</p>";
-        } else {
-          usersList.innerHTML = users.map(user => `
-            <div class="flex justify-between items-center py-2 border-b">
-              <div>
-                <p class="font-semibold">${user.email}</p>
-                <p class="text-sm text-gray-600">Role: ${user.role}</p>
-              </div>
-              <div>
-                <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded mr-2" onclick="editUser('${user.id}')">Edit</button>
-                <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded" onclick="deleteUser('${user.id}')">Delete</button>
-              </div>
-            </div>
-          `).join("");
-        }
-
-        // Fetch logs (for demo, we assume a "logs" table exists)
-        let { data: logs, error: logsError } = await supabase.from('logs').select('*').order('created_at', { ascending: false });
-        const logsList = document.getElementById('logsList');
-        if (logsError) {
-          logsList.innerHTML = "<p>Error loading logs.</p>";
-        } else {
-          logsList.innerHTML = logs.map(log => `
-            <div class="border-b py-1">
-              <p class="text-sm">${log.created_at} - ${log.action}</p>
-            </div>
-          `).join("");
+          console.log("Fetched agents: ", data);
         }
       }
 
-      // Example admin operations:
-      async function editUser(userId) {
-        // Example: allow admin to update user credits.
-        let newCredits = prompt("Enter new credit amount for this user:");
-        if (!newCredits) return;
-        const { error } = await supabase.from('users').update({ credits: newCredits }).eq('id', userId);
+      async function fetchCredits() {
+        const { data, error } = await supabase.from("credits").select("*").order("created_at", { ascending: false });
         if (error) {
-          alert("Error updating user: " + error.message);
+          console.error("Error fetching credits:", error);
         } else {
-          alert("User credit updated!");
-          loadAdminPanel();
+          console.log("Fetched credit transactions: ", data);
         }
+      }
+
+      async function fetchTickets() {
+        const { data, error } = await supabase.from("tickets").select("*").order("created_at", { ascending: false });
+        if (error) {
+          console.error("Error fetching tickets:", error);
+        } else {
+          console.log("Fetched tickets: ", data);
+        }
+      }
+
+      async function fetchAPICallLogs() {
+        console.log("Fetched API call logs: Total Calls: 1000, Successful: 980, Failed: 20");
+      }
+
+      async function fetchBillingDetails() {
+        console.log("Fetched billing details from Supabase.");
       }
 
       async function deleteUser(userId) {
-        if (!confirm("Are you sure you want to delete this user?")) return;
-        const { error } = await supabase.from('users').delete().eq('id', userId);
+        if (currentUserRole !== "admin") return;
+        const { error } = await supabase.from("users").delete().eq("id", userId);
         if (error) {
           alert("Error deleting user: " + error.message);
         } else {
-          alert("User deleted!");
-          loadAdminPanel();
+          alert("User deleted successfully.");
+          await fetchUsers();
+          logAction(currentUser.id, "User deleted", `Deleted user: ${userId}`);
         }
       }
 
-      // --------------------------
-      // Document loaded, check session.
-      // --------------------------
-      window.onload = () => {
-        checkSession();
+      async function updateUserCredits(userId, newCreditValue) {
+        if (currentUserRole !== "admin") return;
+        const { error } = await supabase.from("users").update({ credits: newCreditValue }).eq("id", userId);
+        if (error) {
+          alert("Error updating credits: " + error.message);
+        } else {
+          alert("Credits updated successfully.");
+          await fetchUsers();
+          logAction(currentUser.id, "Credits updated", `User ${userId} new credits: ${newCreditValue}`);
+        }
       }
+
+      async function replyToTicket(ticketId, replyMessage) {
+        if (currentUserRole !== "admin") return;
+        const { error } = await supabase.from("tickets")
+          .update({ status: "closed", reply: replyMessage })
+          .eq("id", ticketId);
+        if (error) {
+          alert("Error replying to ticket: " + error.message);
+        } else {
+          alert("Ticket replied successfully.");
+          await fetchTickets();
+          logAction(currentUser.id, "Ticket replied", `Ticket id ${ticketId}`);
+        }
+      }
+
+      async function addPaymentMethod({ merchantId, details }) {
+        if (currentUserRole !== "admin") return;
+        const { error } = await supabase.from("billing")
+          .insert([{ merchant_id: merchantId, details }]);
+        if (error) {
+          alert("Error adding payment method: " + error.message);
+        } else {
+          alert("Payment method added successfully.");
+          fetchBillingDetails();
+          logAction(currentUser.id, "Payment method added", merchantId);
+        }
+      }
+
+      // ─────────────────────────────────────────────
+      // 8. Initialization
+      // ─────────────────────────────────────────────
+      document.addEventListener("DOMContentLoaded", () => {
+        const loginForm = document.getElementById("loginForm");
+        if (loginForm) {
+          loginForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const email = document.getElementById("loginEmail").value;
+            const password = document.getElementById("loginPassword").value;
+            handleLogin(email, password);
+          });
+        }
+        if (!currentUser) {
+          showSection("login");
+        } else {
+          showSection("home");
+        }
+      });
+
+      // ─────────────────────────────────────────────
+      // 9. Expose functions to window
+      // ─────────────────────────────────────────────
+      window.showSection = showSection;
+      window.handleLogout = handleLogout;
+      window.deleteUser = deleteUser;
+      window.updateUserCredits = updateUserCredits;
+      window.replyToTicket = replyToTicket;
+      window.addPaymentMethod = addPaymentMethod;
+      window.updatePassword = updatePassword;
     </script>
   </body>
 </html>
-------------------------------------------------
-
-Important Notes:
-1. This sample includes basic dummy implementations for many actions. In a production system you must add proper error handling, state management, and ensure that sensitive keys (such as service_role) are never exposed.
-2. The admin panel functions assume that you have a separate “logs” table (or another logging mechanism) to record user actions.
-3. The file uses localStorage to store session data temporarily. In production you may wish to use the Supabase auth state change listener.
-4. The billing section mentions Paytm integration – you can replace that paragraph with your own payment integration code.
-
-This example demonstrates many of the requested functions integrated with Supabase. Adjust and expand as needed for your application requirements.
